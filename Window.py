@@ -8,14 +8,10 @@ class SimpleGUI(QMainWindow):
     def __init__(self):
         super(SimpleGUI, self).__init__()
         self.initUI()
-
-    def initUI(self):      
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
-        self.tab_widget.addTab(Dispatcher(self),"Dispatcher")
-        self.tab_widget.addTab(Input(self),"Input")
-        self.tab_widget.addTab(Projection(self),"Projection")
-        # create the open file action
+    def initUI(self):  
+        #create the open file action
         openFile = QAction('Open', self)
         openFile.setShortcut('Ctrl+O') # Create shortcut
         openFile.setStatusTip('Open new File') # definition of the ation 
@@ -25,13 +21,19 @@ class SimpleGUI(QMainWindow):
         saveFile.setShortcut('Ctrl+S')
         saveFile.setStatusTip('Save File')
         saveFile.triggered.connect(self.Save)# use the Save method
+        #Create new configuration
+        Create = QAction('Create', self)
+        Create.setStatusTip('Create new configuration')
+        Create.triggered.connect(self.New_Config)
         # create menu
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')# add the file section on the menu
         fileMenu.addAction(openFile)
         fileMenu.addAction(saveFile)
+        fileMenu = menubar.addMenu('&New Configuration')
+        fileMenu.addAction(Create)
         # create window
-        self.setGeometry(300, 300, 600, 450)# position and size of the window
+        self.setGeometry(300, 300,500,500)# position and size of the window
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))# the icon of the app
         self.show() 
@@ -46,6 +48,9 @@ class SimpleGUI(QMainWindow):
     # save file method
     def Save(self):
         fsave = QFileDialog.getSaveFileName(self,'Save file','/home')
+    # add nez configuration
+    def New_Config(self):
+        self.tab_widget.addTab(Conf_Tab(self),"Config")    
     
 
 #----------------------------------------------------------------------------------------------------
@@ -62,13 +67,16 @@ class table(QWidget):
     def __init__(self, parent = None):
         super(table, self).__init__()
         
+        
         # create a QTableWidget 
+        
         self.table = QTableWidget(1, 2, self)
         self.table.setHorizontalHeaderLabels(['Parameter', 'Value'])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.verticalHeader().setVisible(False)
         #create combobox
         combobox = QComboBox()
+        list = []
         combobox.addItems(QStringList(self.list))
         #add items
         cell = QTableWidgetItem(QString("Types"))
@@ -76,39 +84,71 @@ class table(QWidget):
         self.table.setCellWidget(0, 1, combobox)
         # create push button and add Types
         self.btn_add_types = QPushButton('Add Type', self)
-        self.btn_add_types.resize(100,20)
-        self.btn_add_types.move(0,192)
         # create text edit
         self.TypeEdit = QLineEdit(self)
-        self.TypeEdit.move(101,192)
+        #self.connect(self.btn_add_types, SIGNAL('clicked()'), self.add_types)
         # create push button and add it to a horizontal layout
         self.btn_add_row = QPushButton('+', self)
-        self.btn_add_row.resize(20,20)
-        self.btn_add_row.move(255,0)
         # connect button clicked signal to our handler
         self.connect(self.btn_add_row, SIGNAL('clicked()'), self.add_row)
         # create push button and delete it to a horizontal layout
         self.btn_del_row = QPushButton('-', self)
-        self.btn_del_row.resize(20,20)
-        self.btn_del_row.move(255,20)
         # connect button clicked signal to our handler
         self.connect(self.btn_del_row, SIGNAL('clicked()'), self.del_row)
+        #add new configuration  
 
+        layout =QGridLayout()
+        layout.addWidget(self.label,0,0)#bug
+        layout.addWidget(self.table,1,0,2,2)
+        layout.addWidget(self.btn_add_types,3,0)
+        layout.addWidget(self.btn_add_row,1,2)
+        layout.addWidget(self.btn_del_row,2,2)
+        layout.addWidget(self.TypeEdit,3,1)
+        self.setLayout(layout)
+
+
+
+
+
+    #def add_types(self):
+        #self.list1 = [self.TypeEdit]
+        #self.list.append(self.list1)
     def add_row(self):
         self.table.setRowCount(self.table.rowCount() + 1)
     def del_row(self):
         if self.table.rowCount() > 1 :
-            self.table.setRowCount(self.table.rowCount() - 1)    
+            self.table.setRowCount(self.table.rowCount() - 1) 
+
+        
+       
 
 class Dispatcher(table):
+    label = QLabel('Dispatcher')#bug
     list = ['Local','OAR',]
     
 class Input(table):
-    list = ['','',]
-  
+    label = QLabel('Input')#bug
+    list = []
+    
 class Projection(table):
-    list = ['','',]
-
+    label = QLabel('Projection')#bug
+    list = []
+    
 #----------------------------------------------------------------------------------------------------
         
-        
+
+class Conf_Tab(QWidget):
+
+    
+    def __init__(self, parent = None):
+        super(Conf_Tab,self).__init__()
+
+        Dis = Dispatcher()
+        Inp = Input()
+        Pro = Projection()
+
+        Layout = QVBoxLayout()
+        Layout.addWidget(Dis)
+        Layout.addWidget(Inp)
+        Layout.addWidget(Pro)
+        self.setLayout(Layout)
