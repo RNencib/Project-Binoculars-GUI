@@ -1,4 +1,4 @@
-import sys
+import sys, csv
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -39,16 +39,44 @@ class SimpleGUI(QMainWindow):
         self.show() 
     # open file method  
     def ShowFile(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file','/home')
-        f = open(fname, 'r') # show the text file on the window
+        #fname = QFileDialog.getOpenFileName(self, 'Open file','/home')
+        #f = open(fname, 'r') # show the text file on the window
         # edit the text
-        with f:        
-            data = f.read()
-            self.textEdit.setText(data) 
+        #with f:        
+            #data = f.read()
+            #self.textEdit.setText(data) 
+        path = QFileDialog.getOpenFileName(
+                self, 'Open File', '', 'CSV(*.csv)')
+        if not path.isEmpty():
+            with open(unicode(path), 'rb') as stream:
+                self.table.setRowCount(0)
+                self.table.setColumnCount(0)
+                for rowdata in csv.reader(stream):
+                    row = self.table.rowCount()
+                    self.table.insertRow(row)
+                    self.table.setColumnCount(len(rowdata))
+                    for column, data in enumerate(rowdata):
+                        item = QTableWidgetItem(data.decode('utf8'))
+                        self.table.setItem(row, column, item)
     # save file method
     def Save(self):
-        fsave = QFileDialog.getSaveFileName(self,'Save file','/home')
-    # add nez configuration
+        #fsave = QFileDialog.getSaveFileName(self,'Save file','/home')
+        path = QFileDialog.getSaveFileName(
+            self, 'Save File', '', 'CSV(*.csv)')
+        if not path.isEmpty():
+            with open(unicode(path), 'wb') as stream:
+                writer = csv.writer(stream)
+                for row in range(self.table.rowCount()):
+                    rowdata = []
+                    for column in range(self.table.columnCount()):
+                        item = self.table.item(row, column)
+                        if item is not None:
+                            rowdata.append(
+                                unicode(item.text()).encode('utf8'))
+                        else:
+                            rowdata.append('')
+                    writer.writerow(rowdata)
+    
     def New_Config(self):
         self.tab_widget.addTab(Conf_Tab(self),"Config")    
     
@@ -95,10 +123,10 @@ class table(QWidget):
         self.btn_del_row = QPushButton('-', self)
         # connect button clicked signal to our handler
         self.connect(self.btn_del_row, SIGNAL('clicked()'), self.del_row)
-        #add new configuration  
+          
 
         layout =QGridLayout()
-        layout.addWidget(self.label,0,0)#bug
+        #layout.addWidget(self.label,0,0)#bug
         layout.addWidget(self.table,1,0,2,2)
         layout.addWidget(self.btn_add_types,3,0)
         layout.addWidget(self.btn_add_row,1,2)
@@ -123,20 +151,20 @@ class table(QWidget):
        
 
 class Dispatcher(table):
-    label = QLabel('Dispatcher')#bug
+    #label = QLabel('Dispatcher')#bug
     list = ['Local','OAR',]
     
 class Input(table):
-    label = QLabel('Input')#bug
+    #label = QLabel('Input')#bug
     list = []
     
 class Projection(table):
-    label = QLabel('Projection')#bug
+    #label = QLabel('Projection')#bug
     list = []
     
 #----------------------------------------------------------------------------------------------------
         
-
+#-----------------------------------------CREATE CONFIG----------------------------------------------
 class Conf_Tab(QWidget):
 
     
