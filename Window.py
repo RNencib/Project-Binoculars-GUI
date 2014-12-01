@@ -133,7 +133,7 @@ class Table(QWidget):
         if self.table.rowCount() > 1 :
             self.table.setRowCount(self.table.rowCount() - 1) 
 
-    def getParams():
+    def getParams(self):
         for index in range self.table.rowCount():
             yield self.table.item(index,0),self.table.item(index,1)
         
@@ -172,7 +172,7 @@ class Conf_Tab(QWidget):
         Layout.addWidget(Pro)
         self.setLayout(Layout)
 
-    def getParams():
+    def getParams(self):
         for param in itertools.chain(Dispatcher.getParams(),Input.getParams(),Projection.getParams):
             yield param
         
