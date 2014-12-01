@@ -56,11 +56,11 @@ class SimpleGUI(QMainWindow):
     def Save(self):
         fsave = QFileDialog.getSaveFileName(self, 'Save File', '', '*.txt')
         widget = current.widget #Conf_Tab
-        widget.Save
+        widget.Save()
 
         Conf_Tab.Save(fsave)
         file = open(fsave)
-        file.write
+        file.write()
 
         Conf_tab.getParams()
 
