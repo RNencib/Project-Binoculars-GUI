@@ -10,8 +10,6 @@ class SimpleGUI(QMainWindow):
         self.initUI()
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
-        self.table = Table(self)
-
     def initUI(self):  
 
         openFile = QAction('Open', self)
@@ -42,34 +40,30 @@ class SimpleGUI(QMainWindow):
         self.setWindowIcon(QIcon('binoculars.png'))
         self.show() 
 
-    def ShowFile(self):
-        path = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
-        if not path.isEmpty():
-                self.table.setRowCount(1)
-                self.table.setColumnCount(3)
-                for rowdata in data.readlines():
-                    row = self.table.rowCount()
-                    self.table.insertRow(row)
-                    self.table.setColumnCount(len(rowdata))
-                    for column, data in enumerate(rowdata):
-                        item = QTableWidgetItem(data.decode('utf8'))
-                        self.table.setItem(row, column, item)
+    #def ShowFile(self):
+     #   path = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
+      #  if not path.isEmpty():
+       #         self.table.setRowCount(1)
+        #        self.table.setColumnCount(3)
+         #       for rowdata in data.readlines():
+          #          row = self.table.rowCount()
+           #         self.table.insertRow(row)
+            #        self.table.setColumnCount(len(rowdata))
+             #       for column, data in enumerate(rowdata):
+              #          item = QTableWidgetItem(data.decode('utf8'))
+               #         self.table.setItem(row, column, item)
 
     def Save(self):
-        path = QFileDialog.getSaveFileName(self, 'Save File', '', '*.txt')
-        if not path.isEmpty():
-                writer = file.write()
-                for row in range(self.table.rowCount()):
-                    rowdata = []
-                    for column in range(self.table.columnCount()):
-                        item = self.table.item(row, column)
-                        if item is not None:
-                            rowdata.append(
-                                unicode(item.text()).encode('utf8'))
-                        else:
-                            rowdata.append('')
-                    writer.writerow(rowdata)
-    
+        fsave = QFileDialog.getSaveFileName(self, 'Save File', '', '*.txt')
+        widget = current.widget #Conf_Tab
+        widget.Save
+
+        Conf_Tab.Save(fsave)
+        file = open(fsave)
+        file.write
+
+        Conf_tab.getParams()
+
     def New_Config(self):
         self.tab_widget.addTab(Conf_Tab(self),"Config")    
     
@@ -96,8 +90,10 @@ class Table(QWidget):
         self.table.verticalHeader().setVisible(False)
         #create combobox
         combobox = QComboBox()
-        choise = []
+        self.choise = []
         combobox.addItems(QStringList(self.choise))
+
+        
         #add items
         cell = QTableWidgetItem(QString("Types"))
         self.table.setItem(0, 0, cell)
@@ -124,7 +120,7 @@ class Table(QWidget):
         self.setLayout(layout)
 
 
-
+ 
 
 
     #def add_types(self):
@@ -132,9 +128,15 @@ class Table(QWidget):
         #self.list.append(self.list1)
     def add_row(self):
         self.table.setRowCount(self.table.rowCount() + 1)
+
     def del_row(self):
         if self.table.rowCount() > 1 :
             self.table.setRowCount(self.table.rowCount() - 1) 
+
+    def getParams():
+        for index in range self.table.rowCount():
+            yield self.table.item(index,0),self.table.item(index,1)
+        
 
         
        
@@ -169,3 +171,8 @@ class Conf_Tab(QWidget):
         Layout.addWidget(Inp)
         Layout.addWidget(Pro)
         self.setLayout(Layout)
+
+    def getParams():
+        for param in itertools.chain(Dispatcher.getParams(),Input.getParams(),Projection.getParams):
+            yield param
+        
