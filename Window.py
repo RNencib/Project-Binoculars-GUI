@@ -10,6 +10,7 @@ class SimpleGUI(QMainWindow):
         self.initUI()
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
+
     def initUI(self):  
 
         openFile = QAction('Open', self)
@@ -40,18 +41,18 @@ class SimpleGUI(QMainWindow):
         self.setWindowIcon(QIcon('binoculars.png'))
         self.show() 
 
-    #def ShowFile(self):
-     #   path = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
-      #  if not path.isEmpty():
-       #         self.table.setRowCount(1)
-        #        self.table.setColumnCount(3)
-         #       for rowdata in data.readlines():
-          #          row = self.table.rowCount()
-           #         self.table.insertRow(row)
-            #        self.table.setColumnCount(len(rowdata))
-             #       for column, data in enumerate(rowdata):
-              #          item = QTableWidgetItem(data.decode('utf8'))
-               #         self.table.setItem(row, column, item)
+    def ShowFile(self):
+        path = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
+       #if not path.isEmpty():
+                #self.table.setRowCount(1)
+                #self.table.setColumnCount(3)
+                #for rowdata in data.readlines():
+                 #   row = self.table.rowCount()
+                  #  self.table.insertRow(row)
+                   # self.table.setColumnCount(len(rowdata))
+                    #for column, data in enumerate(rowdata):
+                     #   item = QTableWidgetItem(data.decode('utf8'))
+                      #  self.table.setItem(row, column, item)
 
     def Save(self):
         fsave = QFileDialog.getSaveFileName(self, 'Save File', '', '*.txt')
@@ -134,7 +135,7 @@ class Table(QWidget):
             self.table.setRowCount(self.table.rowCount() - 1) 
 
     def getParams(self):
-        for index in range self.table.rowCount():
+        for index in range (self.table.rowCount):
             yield self.table.item(index,0),self.table.item(index,1)
         
 
@@ -175,4 +176,5 @@ class Conf_Tab(QWidget):
     def getParams(self):
         for param in itertools.chain(Dispatcher.getParams(),Input.getParams(),Projection.getParams):
             yield param
+        
         
