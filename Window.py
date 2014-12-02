@@ -1,4 +1,5 @@
 import sys, csv
+import itertools
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -48,7 +49,10 @@ class SimpleGUI(QMainWindow):
     def Save(self):
         filename = QFileDialog().getSaveFileName(self, 'Enregistrer', '', '*.txt')
         self.file = open(filename,'w')
-        self.file.write(str(Conf_Tab.getParams(Conf_Tab(self)))) 
+        for i in Conf_Tab.getParams(Conf_Tab()):
+            self.file.write(str(i))
+        #self.file.write(str(Conf_Tab.getParams(Conf_Tab(self)))) 
+        
         self.file.close()
 
 
@@ -123,8 +127,12 @@ class Table(QWidget):
             self.table.setRowCount(self.table.rowCount() - 1) 
 
     def getParams(self):
-        for index in range (self.table.rowCount):
-            yield self.table.item(index,0),self.table.item(index,1)
+        list = []
+        for index in range (self.table.rowCount()):
+            list.append(self.table.item(index,0))
+            list.append(self.table.item(index,1))
+            list.append(self.table.item(index,2))
+            yield list
         
 
         
@@ -162,6 +170,6 @@ class Conf_Tab(QWidget):
         self.setLayout(Layout)
 
     def getParams(self):
-        for param in itertools.chain(Dispatcher.getParams(),Input.getParams(),Projection.getParams):
+        for param in itertools.chain(Dispatcher.getParams(Dispatcher(list)),Input.getParams(Input(list)),Projection.getParams(Projection(list))):
             yield param
         
