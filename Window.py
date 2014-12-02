@@ -43,27 +43,15 @@ class SimpleGUI(QMainWindow):
 
     def ShowFile(self):
         path = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
-       #if not path.isEmpty():
-                #self.table.setRowCount(1)
-                #self.table.setColumnCount(3)
-                #for rowdata in data.readlines():
-                 #   row = self.table.rowCount()
-                  #  self.table.insertRow(row)
-                   # self.table.setColumnCount(len(rowdata))
-                    #for column, data in enumerate(rowdata):
-                     #   item = QTableWidgetItem(data.decode('utf8'))
-                      #  self.table.setItem(row, column, item)
+ 
 
     def Save(self):
-        fsave = QFileDialog.getSaveFileName(self, 'Save File', '', '*.txt')
-        widget = current.widget #Conf_Tab
-        widget.Save()
+        filename = QFileDialog().getSaveFileName(self, 'Enregistrer', '', '*.txt')
+        self.file = open(filename,'w')
+        self.file.write(str(Conf_Tab.getParams(Conf_Tab(self)))) 
+        self.file.close()
 
-        Conf_Tab.Save(fsave)
-        file = open(fsave)
-        file.write()
 
-        Conf_tab.getParams()
 
     def New_Config(self):
         self.tab_widget.addTab(Conf_Tab(self),"Config")    
@@ -176,5 +164,4 @@ class Conf_Tab(QWidget):
     def getParams(self):
         for param in itertools.chain(Dispatcher.getParams(),Input.getParams(),Projection.getParams):
             yield param
-        
         
