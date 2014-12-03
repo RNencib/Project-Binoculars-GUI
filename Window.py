@@ -50,9 +50,8 @@ class SimpleGUI(QMainWindow):
         filename = QFileDialog().getSaveFileName(self, 'Enregistrer', '', '*.txt')
         self.file = open(filename,'w')
         for i in Conf_Tab.getParams(Conf_Tab()):
-            self.file.write(str(i))
-        #self.file.write(str(Conf_Tab.getParams(Conf_Tab(self)))) 
-        
+            self.file.write(str(i)) 
+            print i
         self.file.close()
 
 
@@ -121,18 +120,17 @@ class Table(QWidget):
         #self.list.append(self.list1)
     def add_row(self):
         self.table.setRowCount(self.table.rowCount() + 1)
+        for i in range (self.table.rowCount()):
+            item = QTableWidgetItem(QString(""))
+            self.table.setItem(i, 3, item)
 
     def del_row(self):
         if self.table.rowCount() > 1 :
             self.table.setRowCount(self.table.rowCount() - 1) 
 
-    def getParams(self):
-        list = []
+    def getParam(self):
         for index in range (self.table.rowCount()):
-            list.append(self.table.item(index,0))
-            list.append(self.table.item(index,1))
-            list.append(self.table.item(index,2))
-            yield list
+            yield self.table.item(index,0),self.table.item(index,1)
         
 
         
@@ -170,6 +168,6 @@ class Conf_Tab(QWidget):
         self.setLayout(Layout)
 
     def getParams(self):
-        for param in itertools.chain(Dispatcher.getParams(Dispatcher(list)),Input.getParams(Input(list)),Projection.getParams(Projection(list))):
+        for param in itertools.chain(Dispatcher.getParam(Dispatcher()),Input.getParam(Input()),Projection.getParam(Projection())):
             yield param
-        
+    
