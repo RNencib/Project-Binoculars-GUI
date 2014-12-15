@@ -5,7 +5,6 @@ from PyQt4.QtCore import *
 
 #--------------------------------------------CREATE MAIN WINDOW----------------------------------------
 class SimpleGUI(QMainWindow):
-    
     def __init__(self):
         super(SimpleGUI, self).__init__()
         self.initUI()
@@ -13,18 +12,15 @@ class SimpleGUI(QMainWindow):
         self.setCentralWidget(self.tab_widget)
 
     def initUI(self):  
-
         openFile = QAction('Open', self)
         openFile.setShortcut('Ctrl+O') 
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.ShowFile)
 
-       
         saveFile = QAction('Save', self)
         saveFile.setShortcut('Ctrl+S')
         saveFile.setStatusTip('Save File')
         saveFile.triggered.connect(self.Save)
-
 
         Create = QAction('Create', self)
         Create.setStatusTip('Create new configuration')
@@ -45,35 +41,21 @@ class SimpleGUI(QMainWindow):
     def ShowFile(self):
         path = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
  
-
     def Save(self):
         filename = QFileDialog().getSaveFileName(self, 'Enregistrer', '', '*.txt')
-        self.file = open(filename,'w')
-        for i in Conf_Tab.getParams(Conf_Tab()):
-            self.file.write(str(i)) 
-            print i
-        self.file.close()
-
-
+        widget = self.tab_widget.currentWidget() # ask for the Conf_Tab that is open
+        widget.save(filename) #calls the save method 
 
     def New_Config(self):
         self.tab_widget.addTab(Conf_Tab(self),"Config")    
     
 
 #----------------------------------------------------------------------------------------------------
-
-
-        
-
 #-----------------------------------------CREATE TABLE-----------------------------------------------       
 
-
 class Table(QWidget):
-
-    
-    def __init__(self, parent = None):
+    def __init__(self, choice = [], parent = None):
         super(Table, self).__init__()
-        
         
         # create a QTableWidget 
         self.table = QTableWidget(1, 3, self)
@@ -82,9 +64,7 @@ class Table(QWidget):
         self.table.verticalHeader().setVisible(False)
         #create combobox
         combobox = QComboBox()
-        self.choise = []
-        combobox.addItems(QStringList(self.choise))
-
+        combobox.addItems(QStringList(choice))
         
         #add items
         cell = QTableWidgetItem(QString("Types"))
@@ -100,7 +80,6 @@ class Table(QWidget):
 
         self.btn_del_row = QPushButton('-', self)
         self.connect(self.btn_del_row, SIGNAL('clicked()'), self.del_row)
-          
 
         layout =QGridLayout()
         #layout.addWidget(self.label,0,0)#bug
@@ -111,63 +90,65 @@ class Table(QWidget):
         layout.addWidget(self.TypeEdit,3,1)
         self.setLayout(layout)
 
-
- 
-
-
-    #def add_types(self):
-        #self.list1 = [self.TypeEdit]
-        #self.list.append(self.list1)
     def add_row(self):
-        self.table.setRowCount(self.table.rowCount() + 1)
-        for i in range (self.table.rowCount()):
-            item = QTableWidgetItem(QString(""))
-            self.table.setItem(i, 3, item)
+        self.table.insertRow(self.table.rowCount())
 
     def del_row(self):
         if self.table.rowCount() > 1 :
-            self.table.setRowCount(self.table.rowCount() - 1) 
+            self.table.removeRow(self.table.rowCount())             
 
     def getParam(self):
-        for index in range (self.table.rowCount()):
-            yield self.table.item(index,0),self.table.item(index,1)
+        for index in range(self.table.rowCount()):
+            key = self.table.item(index,0).text()
+            if self.table.item(index,1):
+                value = self.table.item(index, 1).text()
+            else:
+                value = self.table.cellWidget(index, 1).currentText()
+            yield key, value
         
-
-        
-       
-
 class Dispatcher(Table):
-    #label = QLabel('Dispatcher')#bug
-    choise = ['Local','OAR',]
+    def __init__(self, parent = None):
+        choice = ['Local','OAR',]
+        super(Dispatcher, self).__init__(choice)
+        label = QLabel('Dispatcher')#bug
     
 class Input(Table):
-    #label = QLabel('Input')#bug
-    choise = []
-    
+    def __init__(self, parent = None):
+        choice = ['test', 'test1']
+        super(Input, self).__init__(choice)
+        label = QLabel('Input')#bug
+
 class Projection(Table):
-    #label = QLabel('Projection')#bug
-    choise = []
+    def __init__(self, parent = None):
+        choice = ['test', 'test1']
+        super(Projection, self).__init__(choice)
+        label = QLabel('Projection')#bug
     
 #----------------------------------------------------------------------------------------------------
-        
 #-----------------------------------------CREATE CONFIG----------------------------------------------
 class Conf_Tab(QWidget):
-
-    
     def __init__(self, parent = None):
         super(Conf_Tab,self).__init__()
 
-        Dis = Dispatcher()
-        Inp = Input()
-        Pro = Projection()
+        self.Dis = Dispatcher()
+        self.Inp = Input()
+        self.Pro = Projection()
 
         Layout = QVBoxLayout()
-        Layout.addWidget(Dis)
-        Layout.addWidget(Inp)
-        Layout.addWidget(Pro)
+        Layout.addWidget(self.Dis)
+        Layout.addWidget(self.Inp)
+        Layout.addWidget(self.Pro)
         self.setLayout(Layout)
 
-    def getParams(self):
-        for param in itertools.chain(Dispatcher.getParam(Dispatcher()),Input.getParam(Input()),Projection.getParam(Projection())):
-            yield param
-    
+    def save(self, filename):
+        with open(filename, 'w') as fp:
+            fp.write('[dispatcher]\n')
+            for key, value in self.Dis.getParam():# cycles over the iterator object
+                fp.write('{0} = {1}\n'.format(key, value))
+            fp.write('[input]\n')
+            for key, value in self.Inp.getParam():
+                fp.write('{0} = {1}\n'.format(key, value))
+            fp.write('[projection]\n')
+            for key, value in self.Pro.getParam():
+                fp.write('{0} = {1}\n'.format(key, value))
+
