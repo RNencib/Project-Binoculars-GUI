@@ -39,15 +39,24 @@ class SimpleGUI(QMainWindow):
         self.show()
 
     def ShowFile(self):
-        path = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
+        filename = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
+        self.tab_widget.addTab(Conf_Tab(self),filename)
+        widget = self.tab_widget.currentWidget()
+        widget.openfile(filename)
+                
+
+            
+                    
+
+
 
     def Save(self):
         filename = QFileDialog().getSaveFileName(self, 'Enregistrer', '', '*.txt')
-        widget = self.tab_widget.currentWidget() # ask for the Conf_Tab that is open
-        widget.save(filename) #calls the save method
+        widget = self.tab_widget.currentWidget() 
+        widget.save(filename) 
 
     def New_Config(self):
-        self.tab_widget.addTab(Conf_Tab(self),"Config")
+        self.tab_widget.addTab(Conf_Tab(self),'New configuration')
 #----------------------------------------------------------------------------------------------------
 #-----------------------------------------CREATE TABLE-----------------------------------------------
 class Table(QWidget):
@@ -105,6 +114,9 @@ class Table(QWidget):
                 value = self.table.cellWidget(index, 1).currentText()
             yield key, value, comment
 
+
+
+
 class Dispatcher(Table):
     def __init__(self, parent = None):
         choice = ['Local','OAR',]
@@ -150,3 +162,42 @@ class Conf_Tab(QWidget):
             fp.write('[projection]\n')
             for key, value, comment in self.Pro.getParam():
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
+
+    def openfile(self,filename):
+        file = open(filename,'r+')
+        for line in file:
+            if line.startswith ('[dispatcher]'):
+                for comment in self.Dis.getParam():
+                    comment = line.split('#')
+                    file.write(str(comment))
+                for value in self.Dis.getParam():
+                    value = line.split('=',2)
+                    file.write(str(value))
+                for key in self.Dis.getParam():
+                    key = line.split('=',1)
+                    file.write(str(key))
+            if line.startswith ('[input]'):
+                for comment in self.Inp.getParam():
+                    comment = line.split('#')
+                    file.write(str(comment))
+                for value in self.Inp.getParam():
+                    value = line.split('=',2)
+                    file.write(str(value))
+                for key in self.Inp.getParam():
+                    key = line.split('=',1)
+                    file.write(str(key))
+            if line.startswith ('[projection]'):
+                for comment in self.Pro.getParam():
+                    comment = line.split('#')
+                    file.write(str(comment))
+                for value in self.Pro.getParam():
+                    value = line.split('=',2)
+                    file.write(str(value))
+                for key in self.Pro.getParam():
+                    key = line.split('=',1)
+                    file.write(str(key))
+        file.close()
+
+
+
+
