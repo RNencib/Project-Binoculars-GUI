@@ -1,0 +1,12 @@
+[dispatcher]
+key1 = data1 # comment1
+key2 = data2 # comment2
+key3 = data3 # comment3
+[input]
+key10 = data10 # comment10
+key20 = data20 # comment20
+key30 = data30 # comment30
+[projection]
+key55 = data55 # comment55
+key56 = data56 # comment56
+key57 = data57 # comment57
