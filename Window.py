@@ -42,12 +42,16 @@ class SimpleGUI(QMainWindow):
         filename = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
         self.tab_widget.addTab(Conf_Tab(self),filename)
         widget = self.tab_widget.currentWidget()
-        widget.read_data('dat.txt')
+        widget.read_data(filename)
                 
-
-            
+        
+        d = widget.read_data(filename)
+        for k in d.keys():
+            print "%s:" % k 
+            for i in d[k]:
+                print "    %s" % str(i)    
                     
-
+ 
 
 
     def Save(self):
@@ -169,8 +173,8 @@ class Conf_Tab(QWidget):
 
 
 
-    def read_data():
-        with open('dat.txt', 'r') as inf:
+    def read_data(self,filename):
+        with open(filename, 'r') as inf:
             lines = inf.readlines()
  
         data = {'dispatcher': [], 'input': [], 'projection': []}
@@ -179,7 +183,7 @@ class Conf_Tab(QWidget):
                 key = 'dispatcher'
             elif 'input' in line:
                 key = 'input'
-            elif 'projection' in line:
+            elif 'projection' in line: 
                 key = 'projection'
             else:
                 try:
@@ -195,54 +199,7 @@ class Conf_Tab(QWidget):
                 data[key].append([name, value, cauda])
  
         return data
- 
-    d = read_data()
-    for k in d.keys():
-        print "%s:" % k
-        for i in d[k]:
-            print "    %s" % str(i)
-
-
-
-
-    #def openfile(self,filename):
-        #file = open(filename,'r+')
-        #for line in file:
-            #i = line.split('#')
-            #comment = i[-1]
-            #file.write in self.Dis.getParam()
-                   
-
-                #for value in self.Dis.getParam():
-                  #  value = line.split('=')
-                 #   file.write(str(value))
-                #for key in self.Dis.getParam():
-                   # key = line.split('=')
-                   # file.write(str(key))
-
-           # if line.startswith ('[input]'):
-               # for comment in self.Inp.getParam():
-                    #comment = line.split('#')
-                    #file.write(str(comment))
-               # for value in self.Inp.getParam():
-                    #value = line.split('=',2)
-                    #file.write(str(value))
-               # for key in self.Inp.getParam():
-                   # key = line.split('=',1)
-                   # file.write(str(key))
-            
-           # if line.startswith ('[projection]'):
-                #for comment in self.Pro.getParam():
-                   # comment = line.split('#')
-                  #  file.write(str(comment))
-                #for value in self.Pro.getParam():
-                  #  value = line.split('=',2)
-                  #  file.write(str(value))
-                #for key in self.Pro.getParam():
-                   # key = line.split('=',1)
-                  #  file.write(str(key))
-                
-        #file.close()
+    
 
 
 
