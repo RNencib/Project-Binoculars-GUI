@@ -33,6 +33,9 @@ class SimpleGUI(QMainWindow):
         fileMenu = menubar.addMenu('&New Configuration')
         fileMenu.addAction(Create)
 
+        palette = QPalette()
+        palette.setColor(QPalette.Background,Qt.gray)
+        self.setPalette(palette)
         self.setGeometry(300, 300,500,500)
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))
@@ -116,8 +119,11 @@ class Table(QWidget):
                 value = self.table.item(index, 1).text()
             else:
                 value = self.table.cellWidget(index, 1).currentText()
+            if self.table.item == None:
+                value = self.table.item(index,1).text("")
             yield key, value, comment
-
+        
+            
 
 
 
@@ -166,7 +172,7 @@ class Conf_Tab(QWidget):
             fp.write('[projection]\n')
             for key, value, comment in self.Pro.getParam():
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
-
+           
 
 
 
@@ -200,6 +206,12 @@ class Conf_Tab(QWidget):
  
         return data
     
+    
+    
+
+
+
+
 
 
 
