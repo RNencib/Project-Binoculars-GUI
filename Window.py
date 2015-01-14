@@ -179,6 +179,7 @@ class Conf_Tab(QWidget):
 
 
 
+
     def read_data(self,filename):
         with open(filename, 'r') as inf:
             lines = inf.readlines()
@@ -195,7 +196,7 @@ class Conf_Tab(QWidget):
                 try:
                     caput, cauda = line.split('#')
                 except ValueError:
-                # Pas de # dans la ligne
+                # no # in line
                     continue
                 try:
                     name, value = caput.split('=')
@@ -203,10 +204,11 @@ class Conf_Tab(QWidget):
                 # ligne mal formee
                     continue
                 data[key].append([name, value, cauda])
- 
-        return data
-    
-    
+                 
+        for n, key in enumerate(data):
+            for m, item in enumerate(self.data[key]):
+                newitem = QTableWidgetItem(item)
+                self.setItem(m, n, newitem)
     
 
 
