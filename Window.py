@@ -206,7 +206,7 @@ class Conf_Tab(QWidget):
                 data[key].append([name, value, cauda])
                  
         for n, key in enumerate(data):
-            for m, item in enumerate(self.data[key]):
+            for m, item in enumerate(data[key]):
                 newitem = QTableWidgetItem(item)
                 self.setItem(m, n, newitem)
     
