@@ -48,11 +48,11 @@ class SimpleGUI(QMainWindow):
         widget.read_data(filename)
                 
         
-        d = widget.read_data(filename)
-        for k in d.keys():
-            print "%s:" % k 
-            for i in d[k]:
-                print "    %s" % str(i)    
+        #d = widget.read_data(filename)
+        #for k in d.keys():
+            #print "%s:" % k 
+            #for i in d[k]:
+                #print "    %s" % str(i)    
                     
  
 
@@ -205,10 +205,24 @@ class Conf_Tab(QWidget):
                     continue
                 data[key].append([name, value, cauda])
                  
-        for n, key in enumerate(data):
-            for m, item in enumerate(data[key]):
-                newitem = QTableWidgetItem(item)
-                self.setItem(m, n, newitem)
+        if key == 'dispatcher':         
+            for n, key in enumerate(data):
+                for m, item in enumerate(data[key]):
+                    newitem = str(self.Dis.item(m,n).text())
+                    self.setItem(m, n, newitem)
+
+        if key == 'input':         
+            for n, key in enumerate(data):
+                for m, item in enumerate(data[key]):
+                    newitem = str(self.Inp.item(m,n).text())
+                    self.setItem(m, n, newitem)
+
+        if key == 'projection':         
+            for n, key in enumerate(data):
+                for m, item in enumerate(data[key]):
+                    newitem = str(self.Pro.item(m,n).text())
+                    self.setItem(m, n, newitem)
+        
     
 
 
