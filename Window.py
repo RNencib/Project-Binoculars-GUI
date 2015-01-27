@@ -36,7 +36,7 @@ class SimpleGUI(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
         self.setPalette(palette)
-        self.setGeometry(300, 300,500,500)
+        self.setGeometry(250, 200,500,700)
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))
         self.show()
@@ -48,11 +48,11 @@ class SimpleGUI(QMainWindow):
         widget.read_data(filename)
                 
         
-        #d = widget.read_data(filename)
-        #for k in d.keys():
-            #print "%s:" % k 
-            #for i in d[k]:
-                #print "    %s" % str(i)    
+       # d = widget.read_data(filename)
+        # for k in d.keys():
+           # print "%s:" % k 
+           # for i in d[k]:
+               # print "    %s" % str(i)    
                     
  
 
@@ -69,7 +69,7 @@ class SimpleGUI(QMainWindow):
 class Table(QWidget):
     def __init__(self, choice = [], parent = None):
         super(Table, self).__init__()
-       
+        
         # create a QTableWidget
         self.table = QTableWidget(1, 3, self)
         self.table.setHorizontalHeaderLabels(['Parameter', 'Value','Comment'])
@@ -87,16 +87,15 @@ class Table(QWidget):
         self.table.setCellWidget(0, 1, combobox)
         self.table.setItem(0, 2,cell2)
         self.btn_add_types = QPushButton('Add Type', self)
-        self.TypeEdit = QLineEdit(self)
+        self.TypeEdit = QLineEdit()
         
-        #self.connect(self.btn_add_types, SIGNAL('clicked()'), self.add_types)
+        self.connect(self.btn_add_types, SIGNAL('clicked()'), self.add_types)
         self.btn_add_row = QPushButton('+', self)
         self.connect(self.btn_add_row, SIGNAL('clicked()'), self.add_row)
         self.btn_del_row = QPushButton('-', self)
         self.connect(self.btn_del_row, SIGNAL('clicked()'), self.del_row)
         
         layout =QGridLayout()
-        #layout.addWidget(self.label,0,0)
         layout.addWidget(self.table,1,0,2,2)
         layout.addWidget(self.btn_add_types,3,0)
         layout.addWidget(self.btn_add_row,1,2)
@@ -110,6 +109,10 @@ class Table(QWidget):
     def del_row(self):
         if self.table.rowCount() > 1 :
             self.table.removeRow(self.table.rowCount())
+    
+    def add_types(self):
+        value = self.TypeEdit.text()
+        self.choice.append(value)
 
     def getParam(self):
         for index in range(self.table.rowCount()):
@@ -123,27 +126,35 @@ class Table(QWidget):
                 value = self.table.item(index,1).text("")
             yield key, value, comment
         
-            
+    def addItem(self):
+        for row in range(self.table.rowCount()):
+            for col in range(self.table.columnCount()):
+                newitem=QTableWidgetItem(self.table.item(row-1,col).text())
+                item = self.table.setItem(row,col ,newitem)
 
+        
+        return item
+
+                        
 
 
 class Dispatcher(Table):
     def __init__(self, parent = None):
-        choice = ['Local','OAR',]
+        choice = ['Local','OAR']
         super(Dispatcher, self).__init__(choice)
-        label = QLabel('Dispatcher')
+        
 
 class Input(Table):
     def __init__(self, parent = None):
         choice = ['test', 'test1']
         super(Input, self).__init__(choice)
-        label = QLabel('Input')
+        
 
 class Projection(Table):
     def __init__(self, parent = None):
         choice = ['test', 'test1']
         super(Projection, self).__init__(choice)
-        label = QLabel('Projection')
+        
 
 #----------------------------------------------------------------------------------------------------
 #-----------------------------------------CREATE CONFIG----------------------------------------------
@@ -155,9 +166,16 @@ class Conf_Tab(QWidget):
         self.Inp = Input()
         self.Pro = Projection()
 
+        label1 = QLabel('<strong>Dispatcher</strong>')
+        label2 = QLabel('<strong>Input</strong>')
+        label3 = QLabel('<strong>Projection<strong>')
+
         Layout = QVBoxLayout()
+        Layout.addWidget(label1)
         Layout.addWidget(self.Dis)
+        Layout.addWidget(label2)
         Layout.addWidget(self.Inp)
+        Layout.addWidget(label3)
         Layout.addWidget(self.Pro)
         self.setLayout(Layout)
 
@@ -204,24 +222,18 @@ class Conf_Tab(QWidget):
                 # ligne mal formee
                     continue
                 data[key].append([name, value, cauda])
-                 
-        if key == 'dispatcher':         
-            for n, key in enumerate(data):
-                for m, item in enumerate(data[key]):
-                    newitem = str(self.Dis.item(m,n).text())
-                    self.setItem(m, n, newitem)
+         
+            for key in enumerate(data):
+                if key == 'dispatcher':
+                    self.Dis.addItem()
+                elif key == 'Input':
+                    self.Inp.addItem()
+                elif key == 'projection':
+                    self.Pro.addItem()
 
-        if key == 'input':         
-            for n, key in enumerate(data):
-                for m, item in enumerate(data[key]):
-                    newitem = str(self.Inp.item(m,n).text())
-                    self.setItem(m, n, newitem)
-
-        if key == 'projection':         
-            for n, key in enumerate(data):
-                for m, item in enumerate(data[key]):
-                    newitem = str(self.Pro.item(m,n).text())
-                    self.setItem(m, n, newitem)
+                
+       
+        
         
     
 
