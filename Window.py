@@ -32,6 +32,7 @@ class SimpleGUI(QMainWindow):
         fileMenu.addAction(saveFile)
         fileMenu = menubar.addMenu('&New Configuration')
         fileMenu.addAction(Create)
+        fileMenu = menubar.addMenu('&RUN')
 
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
@@ -126,16 +127,16 @@ class Table(QWidget):
                 value = self.table.item(index,1).text("")
             yield key, value, comment
         
-    def addItem(self):
-        for row in range(self.table.rowCount()):
+    def addData(self, data):
+        for item in data:
+            self.add_row()
+            row = self.table.rowCount()
             for col in range(self.table.columnCount()):
-                newitem=QTableWidgetItem(self.table.item(row-1,col).text())
-                item = self.table.setItem(row,col ,newitem)
-
-        
-        return item
-
-                        
+                newitem = QTableWidgetItem(item[col])
+                self.table.setItem(row -1, col, newitem)
+                self.table.setCellWidget(1, 1,QComboBox())
+        self.table.removeRow(0)
+                
 
 
 class Dispatcher(Table):
@@ -192,12 +193,6 @@ class Conf_Tab(QWidget):
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
            
 
-
-
-
-
-
-
     def read_data(self,filename):
         with open(filename, 'r') as inf:
             lines = inf.readlines()
@@ -223,13 +218,13 @@ class Conf_Tab(QWidget):
                     continue
                 data[key].append([name, value, cauda])
          
-            for key in enumerate(data):
-                if key == 'dispatcher':
-                    self.Dis.addItem()
-                elif key == 'Input':
-                    self.Inp.addItem()
-                elif key == 'projection':
-                    self.Pro.addItem()
+        for key in data:
+            if key == 'dispatcher':
+                self.Dis.addData(data[key])
+            elif key == 'input':
+                self.Inp.addData(data[key])
+            elif key == 'projection':
+                self.Pro.addData(data[key])
 
                 
        
