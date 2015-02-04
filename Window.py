@@ -113,11 +113,14 @@ class Table(QWidget):
     
     def add_types(self):
         value = self.TypeEdit.text()
-        self.choice.append(value)
+        choice = []
+        choice.append(value)
+        for item in choice:
+            self.combobox.addItems(QStringList(item))
 
     def getParam(self):
         for index in range(self.table.rowCount()):
-            key = self.table.item(index,0).text()
+            key = self.table.item(index,0).text() 
             comment = self.table.item(index, 2).text()
             if self.table.item(index,1):
                 value = self.table.item(index, 1).text()
@@ -129,14 +132,19 @@ class Table(QWidget):
         
     def addData(self, data):
         for item in data:
-            self.add_row()
-            row = self.table.rowCount()
-            for col in range(self.table.columnCount()):
-                newitem = QTableWidgetItem(item[col])
-                self.table.setItem(row -1, col, newitem)
-                self.table.setCellWidget(1, 1,QComboBox())
-        self.table.removeRow(0)
-                
+            if item[0] == 'Types':
+                    box = self.table.cellWidget(0,1)
+                    box.setCurrentIndex(box.findText(item[1]))
+                    #com = self.table.item(0,2)
+                    #com.setCurrentCell(item[2])
+
+            else:
+                self.add_row()
+                row = self.table.rowCount()
+                for col in range(self.table.columnCount()):
+                    newitem = QTableWidgetItem(item[col])
+                    self.table.setItem(row -1, col, newitem)
+                            
 
 
 class Dispatcher(Table):
@@ -216,7 +224,7 @@ class Conf_Tab(QWidget):
                 except ValueError:
                 # ligne mal formee
                     continue
-                data[key].append([name, value, cauda])
+                data[key].append([name.strip(' '), value.strip(' '), cauda.strip(' ')])
          
         for key in data:
             if key == 'dispatcher':
