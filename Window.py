@@ -78,14 +78,14 @@ class Table(QWidget):
         self.table.verticalHeader().setVisible(False)
         
         #create combobox
-        combobox = QComboBox()
-        combobox.addItems(QStringList(choice))
+        self.combobox = QComboBox()
+        self.combobox.addItems(QStringList(choice))
         
         #add items
         cell = QTableWidgetItem(QString("Types"))
         cell2 = QTableWidgetItem(QString(""))
         self.table.setItem(0, 0, cell)
-        self.table.setCellWidget(0, 1, combobox)
+        self.table.setCellWidget(0, 1, self.combobox)
         self.table.setItem(0, 2,cell2)
         self.btn_add_types = QPushButton('Add Type', self)
         self.TypeEdit = QLineEdit()
@@ -134,8 +134,9 @@ class Table(QWidget):
         for item in data:
             if item[0] == 'Types':
                     box = self.table.cellWidget(0,1)
+                    box.addItems(QStringList(item[1]))
                     box.setCurrentIndex(box.findText(item[1]))
-                    #com = self.table.item(0,2)
+                    #com = self.table.Item(0,2)
                     #com.setCurrentCell(item[2])
 
             else:
@@ -151,6 +152,7 @@ class Dispatcher(Table):
     def __init__(self, parent = None):
         choice = ['Local','OAR']
         super(Dispatcher, self).__init__(choice)
+        
         
 
 class Input(Table):
