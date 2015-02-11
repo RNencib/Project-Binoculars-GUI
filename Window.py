@@ -1,5 +1,9 @@
 import sys, csv
 import itertools
+import inspect
+from bm25 import *
+from id03 import *
+from id03_xu import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #--------------------------------------------CREATE MAIN WINDOW----------------------------------------
@@ -10,6 +14,7 @@ class SimpleGUI(QMainWindow):
         self.initUI()
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
+
 
     def initUI(self):
         openFile = QAction('Open', self)
@@ -37,7 +42,7 @@ class SimpleGUI(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
         self.setPalette(palette)
-        self.setGeometry(250, 200,500,700)
+        self.setGeometry(250, 200,1050,700)
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))
         self.show()
@@ -47,7 +52,7 @@ class SimpleGUI(QMainWindow):
         self.tab_widget.addTab(Conf_Tab(self),filename)
         widget = self.tab_widget.currentWidget()
         widget.read_data(filename)
-                
+           
         
        # d = widget.read_data(filename)
         # for k in d.keys():
@@ -62,9 +67,10 @@ class SimpleGUI(QMainWindow):
         filename = QFileDialog().getSaveFileName(self, 'Enregistrer', '', '*.txt')
         widget = self.tab_widget.currentWidget() 
         widget.save(filename) 
-
+        
     def New_Config(self):
         self.tab_widget.addTab(Conf_Tab(self),'New configuration')
+
 #----------------------------------------------------------------------------------------------------
 #-----------------------------------------CREATE TABLE-----------------------------------------------
 class Table(QWidget):
@@ -80,43 +86,25 @@ class Table(QWidget):
         #create combobox
         self.combobox = QComboBox()
         self.combobox.addItems(QStringList(choice))
-        
+         
         #add items
         cell = QTableWidgetItem(QString("Types"))
         cell2 = QTableWidgetItem(QString(""))
         self.table.setItem(0, 0, cell)
         self.table.setCellWidget(0, 1, self.combobox)
         self.table.setItem(0, 2,cell2)
-        self.btn_add_types = QPushButton('Add Type', self)
-        self.TypeEdit = QLineEdit()
-        
-        self.connect(self.btn_add_types, SIGNAL('clicked()'), self.add_types)
+
         self.btn_add_row = QPushButton('+', self)
         self.connect(self.btn_add_row, SIGNAL('clicked()'), self.add_row)
-        self.btn_del_row = QPushButton('-', self)
-        self.connect(self.btn_del_row, SIGNAL('clicked()'), self.del_row)
         
         layout =QGridLayout()
-        layout.addWidget(self.table,1,0,2,2)
-        layout.addWidget(self.btn_add_types,3,0)
-        layout.addWidget(self.btn_add_row,1,2)
-        layout.addWidget(self.btn_del_row,2,2)
-        layout.addWidget(self.TypeEdit,3,1)
+        layout.addWidget(self.table,0,0,3,10)
+        layout.addWidget(self.btn_add_row,0,11)
         self.setLayout(layout)
 
     def add_row(self):
         self.table.insertRow(self.table.rowCount())
 
-    def del_row(self):
-        if self.table.rowCount() > 1 :
-            self.table.removeRow(self.table.rowCount())
-    
-    def add_types(self):
-        value = self.TypeEdit.text()
-        choice = []
-        choice.append(value)
-        for item in choice:
-            self.combobox.addItems(QStringList(item))
 
     def getParam(self):
         for index in range(self.table.rowCount()):
@@ -136,8 +124,7 @@ class Table(QWidget):
                     box = self.table.cellWidget(0,1)
                     box.addItems(QStringList(item[1]))
                     box.setCurrentIndex(box.findText(item[1]))
-                    #com = self.table.Item(0,2)
-                    #com.setCurrentCell(item[2])
+                    
 
             else:
                 self.add_row()
@@ -145,8 +132,21 @@ class Table(QWidget):
                 for col in range(self.table.columnCount()):
                     newitem = QTableWidgetItem(item[col])
                     self.table.setItem(row -1, col, newitem)
-                            
+    
 
+    #def get_arguments(addData):
+
+        #args = inspect.getargspec(Table.addData)
+        #varnames = args.args
+        #defaults_values = args.defaults
+        #if defaults_values != None:
+            #optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
+            #varnames = varnames[:len(defaults_values)+1]
+        #else:
+            #optionnals_args = {}
+        #return(varnames, optionnals_args, args.varargs)
+
+    
 
 class Dispatcher(Table):
     def __init__(self, parent = None):
@@ -181,13 +181,23 @@ class Conf_Tab(QWidget):
         label2 = QLabel('<strong>Input</strong>')
         label3 = QLabel('<strong>Projection<strong>')
 
-        Layout = QVBoxLayout()
-        Layout.addWidget(label1)
-        Layout.addWidget(self.Dis)
-        Layout.addWidget(label2)
-        Layout.addWidget(self.Inp)
-        Layout.addWidget(label3)
-        Layout.addWidget(self.Pro)
+        select = QComboBox()
+        list = ['id03', 'id03_xu', 'bm25']
+        select.addItems(QStringList(list))
+        run = QPushButton('run')
+        scan = QLineEdit()
+        run.setStyleSheet("background-color: darkred")
+
+        Layout = QGridLayout()
+        Layout.addWidget(select,0,1)
+        Layout.addWidget(label1,1,1)
+        Layout.addWidget(self.Dis,2,1)
+        Layout.addWidget(label2,3,1)
+        Layout.addWidget(self.Inp,4,1)
+        Layout.addWidget(label3,5,1)
+        Layout.addWidget(self.Pro,6,1)
+        Layout.addWidget(run,7,0)
+        Layout.addWidget(scan,7,1)
         self.setLayout(Layout)
 
     def save(self, filename):
@@ -219,12 +229,12 @@ class Conf_Tab(QWidget):
                 try:
                     caput, cauda = line.split('#')
                 except ValueError:
-                # no # in line
+                # no '#' in line
                     continue
                 try:
                     name, value = caput.split('=')
                 except ValueError:
-                # ligne mal formee
+                # wrong line
                     continue
                 data[key].append([name.strip(' '), value.strip(' '), cauda.strip(' ')])
          
@@ -238,10 +248,29 @@ class Conf_Tab(QWidget):
 
                 
        
-        
+    #def get_backend(function):
+        #args = inspect.getargspec(function)
+        #varnames = args.args
+        #defaults_values = args.defaults
+        #if defaults_values != None:
+            #optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
+            #varnames = varnames[:len(defaults_values)+1]
+        #else:
+            #optionnals_args = {}
+        #return(varnames, optionnals_args, args.varargs)   
         
     
-
+    #def get_Projection(function):
+        #args = inspect.getargspec(function)
+        #varnames = args.args
+        #defaults_values = args.defaults
+        #if defaults_values != None:
+           #optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
+            #varnames = varnames[:len(defaults_values)+1]
+        #else:
+            #optionnals_args = {}
+        #return(varnames, optionnals_args, args.varargs)   
+        
 
 
 
