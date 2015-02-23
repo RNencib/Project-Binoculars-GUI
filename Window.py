@@ -1,11 +1,11 @@
-import sys, csv
+import sys, csv, os
 import itertools
 import inspect
-from bm25 import *
-from id03 import *
-from id03_xu import *
+import glob
+import BINoculars
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+
 #--------------------------------------------CREATE MAIN WINDOW----------------------------------------
 class SimpleGUI(QMainWindow):
 
@@ -30,7 +30,7 @@ class SimpleGUI(QMainWindow):
         Create = QAction('Create', self)
         Create.setStatusTip('Create new configuration')
         Create.triggered.connect(self.New_Config)
-        
+         
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openFile)
@@ -42,13 +42,13 @@ class SimpleGUI(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
         self.setPalette(palette)
-        self.setGeometry(250, 200,1050,700)
+        self.setGeometry(250, 200,700,700)
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))
         self.show()
 
     def ShowFile(self):
-        filename = QFileDialog.getOpenFileName(self, 'Open File', '', '*.txt')
+        filename = QFileDialog.getOpenFileName(self, 'Open File', '')
         self.tab_widget.addTab(Conf_Tab(self),filename)
         widget = self.tab_widget.currentWidget()
         widget.read_data(filename)
@@ -132,19 +132,6 @@ class Table(QWidget):
                 for col in range(self.table.columnCount()):
                     newitem = QTableWidgetItem(item[col])
                     self.table.setItem(row -1, col, newitem)
-    
-
-    #def get_arguments(addData):
-
-        #args = inspect.getargspec(Table.addData)
-        #varnames = args.args
-        #defaults_values = args.defaults
-        #if defaults_values != None:
-            #optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
-            #varnames = varnames[:len(defaults_values)+1]
-        #else:
-            #optionnals_args = {}
-        #return(varnames, optionnals_args, args.varargs)
 
     
 
@@ -181,24 +168,37 @@ class Conf_Tab(QWidget):
         label2 = QLabel('<strong>Input</strong>')
         label3 = QLabel('<strong>Projection<strong>')
 
-        select = QComboBox()
-        list = ['id03', 'id03_xu', 'bm25']
-        select.addItems(QStringList(list))
-        run = QPushButton('run')
-        scan = QLineEdit()
-        run.setStyleSheet("background-color: darkred")
+        self.select = QComboBox()
+        self.select.addItems(QStringList(['id03', 'id03_xu', 'bm25']))
+        self.run = QPushButton('run')
+        self.scan = QLineEdit()
+        self.run.setStyleSheet("background-color: darkred")
 
         Layout = QGridLayout()
-        Layout.addWidget(select,0,1)
+        Layout.addWidget(self.select,0,1)
         Layout.addWidget(label1,1,1)
         Layout.addWidget(self.Dis,2,1)
         Layout.addWidget(label2,3,1)
         Layout.addWidget(self.Inp,4,1)
         Layout.addWidget(label3,5,1)
         Layout.addWidget(self.Pro,6,1)
-        Layout.addWidget(run,7,0)
-        Layout.addWidget(scan,7,1)
+        Layout.addWidget(self.run,7,0)
+        Layout.addWidget(self.scan,7,1)
         self.setLayout(Layout)
+
+
+        path = './BINoculars/backends/'
+        allfiles = glob.glob(os.path.join(path, '*.py'))
+        backends = dict()
+
+        for file in allfiles:
+            try:
+                name = os.path.splitext(os.path.basename(file))[0]
+                backends[name] = __import__('BINoculars.backends.{0}'.format(name), globals(), locals(), [], -1)
+            except ImportError as e:
+                print 'Import backend error: {0} with error message {1}'.format(name, e.message)
+        print inspect.getmembers(backends['id03'])
+        
 
     def save(self, filename):
         with open(filename, 'w') as fp:
@@ -248,16 +248,16 @@ class Conf_Tab(QWidget):
 
                 
        
-    #def get_backend(function):
-        #args = inspect.getargspec(function)
-        #varnames = args.args
-        #defaults_values = args.defaults
-        #if defaults_values != None:
-            #optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
-            #varnames = varnames[:len(defaults_values)+1]
-        #else:
-            #optionnals_args = {}
-        #return(varnames, optionnals_args, args.varargs)   
+    def get_backend(ID03Input):
+        args = inspect.getargspec(ID03Input)
+        varnames = args.args
+        defaults_values = args.defaults
+        if defaults_values != None:
+            optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
+            varnames = varnames[:len(defaults_values)+1]
+        else:
+            optionnals_args = {}
+        return(varnames, optionnals_args, args.varargs)   
         
     
     #def get_Projection(function):
