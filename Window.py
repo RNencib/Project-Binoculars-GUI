@@ -2,7 +2,7 @@ import sys, csv, os
 import itertools
 import inspect
 import glob
-import BINoculars
+import BINoculars.util
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -52,15 +52,6 @@ class SimpleGUI(QMainWindow):
         self.tab_widget.addTab(Conf_Tab(self),filename)
         widget = self.tab_widget.currentWidget()
         widget.read_data(filename)
-           
-        
-       # d = widget.read_data(filename)
-        # for k in d.keys():
-           # print "%s:" % k 
-           # for i in d[k]:
-               # print "    %s" % str(i)    
-                    
- 
 
 
     def Save(self):
@@ -74,7 +65,7 @@ class SimpleGUI(QMainWindow):
 #----------------------------------------------------------------------------------------------------
 #-----------------------------------------CREATE TABLE-----------------------------------------------
 class Table(QWidget):
-    def __init__(self, choice = [], parent = None):
+    def __init__(self, parent = None):
         super(Table, self).__init__()
         
         # create a QTableWidget
@@ -85,8 +76,6 @@ class Table(QWidget):
         
         #create combobox
         self.combobox = QComboBox()
-        self.combobox.addItems(QStringList(choice))
-         
         #add items
         cell = QTableWidgetItem(QString("Types"))
         cell2 = QTableWidgetItem(QString(""))
@@ -137,21 +126,18 @@ class Table(QWidget):
 
 class Dispatcher(Table):
     def __init__(self, parent = None):
-        choice = ['Local','OAR']
-        super(Dispatcher, self).__init__(choice)
+        super(Dispatcher, self).__init__()
         
         
 
 class Input(Table):
     def __init__(self, parent = None):
-        choice = ['test', 'test1']
-        super(Input, self).__init__(choice)
+        super(Input, self).__init__()
         
 
 class Projection(Table):
     def __init__(self, parent = None):
-        choice = ['test', 'test1']
-        super(Projection, self).__init__(choice)
+        super(Projection, self).__init__()
         
 
 #----------------------------------------------------------------------------------------------------
@@ -169,7 +155,7 @@ class Conf_Tab(QWidget):
         label3 = QLabel('<strong>Projection<strong>')
 
         self.select = QComboBox()
-        self.select.addItems(QStringList(['id03', 'id03_xu', 'bm25']))
+        self.select.addItems(QStringList(BINoculars.util.get_backends()))
         self.run = QPushButton('run')
         self.scan = QLineEdit()
         self.run.setStyleSheet("background-color: darkred")
@@ -185,21 +171,22 @@ class Conf_Tab(QWidget):
         Layout.addWidget(self.run,7,0)
         Layout.addWidget(self.scan,7,1)
         self.setLayout(Layout)
+ 
+        self.Dis.combobox.addItems(QStringList(BINoculars.util.get_dispatchers()))
+        self.select.activated['QString'].connect(self.DataCombo)
 
-
-        path = './BINoculars/backends/'
-        allfiles = glob.glob(os.path.join(path, '*.py'))
-        backends = dict()
-
-        for file in allfiles:
-            try:
-                name = os.path.splitext(os.path.basename(file))[0]
-                backends[name] = __import__('BINoculars.backends.{0}'.format(name), globals(), locals(), [], -1)
-            except ImportError as e:
-                print 'Import backend error: {0} with error message {1}'.format(name, e.message)
-        print inspect.getmembers(backends['id03'])
+    def DataCombo(self,text):
+        if text == 'id03':
+            self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('id03')))
+            self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('id03')))
+        elif text == 'bm25':
+            self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('bm25')))
+            self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('bm25')))
+        elif text == 'id03_xu':
+            self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('id03_xu')))
+            self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('id03_xu')))
         
-
+ 
     def save(self, filename):
         with open(filename, 'w') as fp:
             fp.write('[dispatcher]\n')
@@ -247,34 +234,7 @@ class Conf_Tab(QWidget):
                 self.Pro.addData(data[key])
 
                 
-       
-    def get_backend(ID03Input):
-        args = inspect.getargspec(ID03Input)
-        varnames = args.args
-        defaults_values = args.defaults
-        if defaults_values != None:
-            optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
-            varnames = varnames[:len(defaults_values)+1]
-        else:
-            optionnals_args = {}
-        return(varnames, optionnals_args, args.varargs)   
-        
     
-    #def get_Projection(function):
-        #args = inspect.getargspec(function)
-        #varnames = args.args
-        #defaults_values = args.defaults
-        #if defaults_values != None:
-           #optionnals_args = dict(izip(varnames[-len(defaults_values):], defaults_values))
-            #varnames = varnames[:len(defaults_values)+1]
-        #else:
-            #optionnals_args = {}
-        #return(varnames, optionnals_args, args.varargs)   
-        
-
-
-
-
 
 
 
