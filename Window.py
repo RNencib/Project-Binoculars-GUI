@@ -113,8 +113,6 @@ class Table(QWidget):
                     box = self.table.cellWidget(0,1)
                     box.addItems(QStringList(item[1]))
                     box.setCurrentIndex(box.findText(item[1]))
-                    
-
             else: 
                 self.add_row()
                 row = self.table.rowCount()
@@ -123,13 +121,11 @@ class Table(QWidget):
                     self.table.setItem(row -1, col, newitem)
 
     
-
 class Dispatcher(Table):
     def __init__(self, parent = None):
         super(Dispatcher, self).__init__()
         
         
-
 class Input(Table):
     def __init__(self, parent = None):
         super(Input, self).__init__()
@@ -176,16 +172,10 @@ class Conf_Tab(QWidget):
         self.select.activated['QString'].connect(self.DataCombo)
 
     def DataCombo(self,text):
-        if text == 'id03':
-            self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('id03')))
-            self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('id03')))
-        #elif text == 'bm25':
-            #self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('bm25')))
-            #self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('bm25')))
-        #elif text == 'id03_xu':
-            #self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('id03_xu')))
-            #self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('id03_xu')))
-        print BINoculars.util.get_HKLProjection()
+        self.Inp.combobox.clear()
+        self.Pro.combobox.clear()
+        self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs(str(text))))
+        self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections(str(text))))
  
     def save(self, filename): 
         with open(filename, 'w') as fp:
