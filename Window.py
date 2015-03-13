@@ -42,7 +42,7 @@ class SimpleGUI(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
         self.setPalette(palette)
-        self.setGeometry(250, 200,700,700)
+        self.setGeometry(250, 200,500,500)
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))
         self.show()
@@ -115,7 +115,7 @@ class Table(QWidget):
                     box.setCurrentIndex(box.findText(item[1]))
                     
 
-            else:
+            else: 
                 self.add_row()
                 row = self.table.rowCount()
                 for col in range(self.table.columnCount()):
@@ -179,15 +179,15 @@ class Conf_Tab(QWidget):
         if text == 'id03':
             self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('id03')))
             self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('id03')))
-        elif text == 'bm25':
-            self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('bm25')))
-            self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('bm25')))
-        elif text == 'id03_xu':
-            self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('id03_xu')))
-            self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('id03_xu')))
-        
+        #elif text == 'bm25':
+            #self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('bm25')))
+            #self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('bm25')))
+        #elif text == 'id03_xu':
+            #self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs('id03_xu')))
+            #self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections('id03_xu')))
+        print BINoculars.util.get_HKLProjection()
  
-    def save(self, filename):
+    def save(self, filename): 
         with open(filename, 'w') as fp:
             fp.write('[dispatcher]\n')
             for key, value, comment in self.Dis.getParam():# cycles over the iterator object
