@@ -77,7 +77,7 @@ class Table(QWidget):
         #create combobox
         self.combobox = QComboBox()
         #add items
-        cell = QTableWidgetItem(QString("Types"))
+        cell = QTableWidgetItem(QString("type"))
         cell2 = QTableWidgetItem(QString(""))
         self.table.setItem(0, 0, cell)
         self.table.setCellWidget(0, 1, self.combobox)
@@ -109,7 +109,7 @@ class Table(QWidget):
         
     def addData(self, data):
         for item in data:
-            if item[0] == 'Types':
+            if item[0] == 'type':
                     box = self.table.cellWidget(0,1)
                     box.addItems(QStringList(item[1]))
                     box.setCurrentIndex(box.findText(item[1]))
@@ -121,20 +121,7 @@ class Table(QWidget):
                     self.table.setItem(row -1, col, newitem)
 
     
-class Dispatcher(Table):
-    def __init__(self, parent = None):
-        super(Dispatcher, self).__init__()
-        
-        
-class Input(Table):
-    def __init__(self, parent = None):
-        super(Input, self).__init__()
-        
-
-class Projection(Table):
-    def __init__(self, parent = None):
-        super(Projection, self).__init__()
-        
+    
 
 #----------------------------------------------------------------------------------------------------
 #-----------------------------------------CREATE CONFIG----------------------------------------------
@@ -142,9 +129,9 @@ class Conf_Tab(QWidget):
     def __init__(self, parent = None):
 
         super(Conf_Tab,self).__init__()
-        self.Dis = Dispatcher()
-        self.Inp = Input()
-        self.Pro = Projection()
+        self.Dis = Table()
+        self.Inp = Table()
+        self.Pro = Table()
 
         label1 = QLabel('<strong>Dispatcher</strong>')
         label2 = QLabel('<strong>Input</strong>')
@@ -170,12 +157,29 @@ class Conf_Tab(QWidget):
  
         self.Dis.combobox.addItems(QStringList(BINoculars.util.get_dispatchers()))
         self.select.activated['QString'].connect(self.DataCombo)
+        self.Inp.combobox.activated['QString'].connect(self.DataTable)
+        self.Pro.combobox.activated['QString'].connect(self.DataTable)
+        self.Dis.combobox.activated['QString'].connect(self.DataTable)
+    
 
     def DataCombo(self,text):
         self.Inp.combobox.clear()
         self.Pro.combobox.clear()
         self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs(str(text))))
         self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections(str(text))))
+
+    def DataTable (self,text):
+        index = self.select.findText(str(text))
+        backend = self.select.setCurrentIndex(index)
+        index_Inp = self.Inp.combobox.findText(str(text))
+        value_Inp = self.Inp.combobox.setCurrentIndex(index_Inp)
+        index_Dis = self.Dis.combobox.findText(str(text))
+        value_Dis = self.Dis.combobox.setCurrentIndex(index_Dis)
+        index_Pro = self.Pro.combobox.findText(str(text))
+        value_Pro = self.Pro.combobox.setCurrentIndex(index_Pro) 
+        BINoculars.util.get_input_configkeys(backend,value_Inp)
+        BINoculars.util.get_dispatcher_configkeys(backend,value_Dis)
+        BINoculars.util.get_projection_configkeys(backend,value_Pro)
  
     def save(self, filename): 
         with open(filename, 'w') as fp:
