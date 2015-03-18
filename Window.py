@@ -120,7 +120,18 @@ class Table(QWidget):
                     newitem = QTableWidgetItem(item[col])
                     self.table.setItem(row -1, col, newitem)
 
-    
+    def addDataConf(self,backend,value_Inp):
+        for item in BINoculars.util.get_input_configkeys(backend,value_Inp):
+            self.add_row()
+            row = self.table.rowCount()
+            for col in range(self.table.columnCount()):
+                if col == 1:
+                    QTableWidgetItem('')
+                else:
+                    newitem = QTableWidgetItem(item[col])
+                    self.table.setItem(row -1, col, newitem)
+
+        
     
 
 #----------------------------------------------------------------------------------------------------
@@ -173,9 +184,10 @@ class Conf_Tab(QWidget):
         value_Inp = str(self.Inp.combobox.currentText())
         value_Dis = str(self.Dis.combobox.currentText())
         value_Pro = str(self.Pro.combobox.currentText()) 
-        print BINoculars.util.get_input_configkeys(backend,value_Inp)
-        print BINoculars.util.get_dispatcher_configkeys(value_Dis)
-        print BINoculars.util.get_projection_configkeys(backend,value_Pro)
+        self.Inp.addDataConf(backend,value_Inp)
+        #BINoculars.util.get_input_configkeys(backend,value_Inp)
+        #BINoculars.util.get_dispatcher_configkeys(value_Dis)
+        #BINoculars.util.get_projection_configkeys(backend,value_Pro)
  
     def save(self, filename): 
         with open(filename, 'w') as fp:
