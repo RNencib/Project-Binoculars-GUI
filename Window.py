@@ -169,17 +169,13 @@ class Conf_Tab(QWidget):
         self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections(str(text))))
 
     def DataTable (self,text):
-        index = self.select.findText(str(text))
-        backend = self.select.setCurrentIndex(index)
-        index_Inp = self.Inp.combobox.findText(str(text))
-        value_Inp = self.Inp.combobox.setCurrentIndex(index_Inp)
-        index_Dis = self.Dis.combobox.findText(str(text))
-        value_Dis = self.Dis.combobox.setCurrentIndex(index_Dis)
-        index_Pro = self.Pro.combobox.findText(str(text))
-        value_Pro = self.Pro.combobox.setCurrentIndex(index_Pro) 
-        BINoculars.util.get_input_configkeys(backend,value_Inp)
-        BINoculars.util.get_dispatcher_configkeys(backend,value_Dis)
-        BINoculars.util.get_projection_configkeys(backend,value_Pro)
+        backend = str(self.select.currentText())
+        value_Inp = str(self.Inp.combobox.currentText())
+        value_Dis = str(self.Dis.combobox.currentText())
+        value_Pro = str(self.Pro.combobox.currentText()) 
+        print BINoculars.util.get_input_configkeys(backend,value_Inp)
+        print BINoculars.util.get_dispatcher_configkeys(value_Dis)
+        print BINoculars.util.get_projection_configkeys(backend,value_Pro)
  
     def save(self, filename): 
         with open(filename, 'w') as fp:
