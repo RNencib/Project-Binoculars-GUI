@@ -14,7 +14,11 @@ class SimpleGUI(QMainWindow):
         self.initUI()
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
+        close = self.tab_widget.setTabsClosable(True)
+        self.tab_widget.tabCloseRequested.connect(self.close_tab)
 
+    def close_tab(self, tab):
+        self.tab_widget.removeTab(tab)
 
     def initUI(self):
         openFile = QAction('Open', self)
@@ -49,7 +53,11 @@ class SimpleGUI(QMainWindow):
 
     def ShowFile(self):
         filename = QFileDialog.getOpenFileName(self, 'Open File', '')
-        self.tab_widget.addTab(Conf_Tab(self),filename)
+        for F in filename.split('/') :
+            NameFile = []
+            NameFile.append(F)
+        NameFile.reverse()
+        self.tab_widget.addTab(Conf_Tab(self),NameFile[0])
         widget = self.tab_widget.currentWidget()
         widget.read_data(filename)
 
@@ -94,6 +102,9 @@ class Table(QWidget):
     def add_row(self):
         self.table.insertRow(self.table.rowCount())
 
+    def get_keys(self):
+        return list(self.table.item(index,0).text() for index in range(self.table.rowCount())) 
+
 
     def getParam(self):
         for index in range(self.table.rowCount()):
@@ -120,16 +131,11 @@ class Table(QWidget):
                     newitem = QTableWidgetItem(item[col])
                     self.table.setItem(row -1, col, newitem)
 
-    def addDataConf(self,backend,value_Inp):
-        for item in BINoculars.util.get_input_configkeys(backend,value_Inp):
-            self.add_row()
-            row = self.table.rowCount()
-            for col in range(self.table.columnCount()):
-                if col == 1:
-                    QTableWidgetItem('')
-                else:
-                    newitem = QTableWidgetItem(item[col])
-                    self.table.setItem(row -1, col, newitem)
+    def addDataConf(self, items):
+        keys = self.get_keys()
+        newconfigs = list([item[0], '', item[1]] for item in items if item[0] not in keys)
+        self.addData(newconfigs)
+                
 
         
     
@@ -171,7 +177,7 @@ class Conf_Tab(QWidget):
         self.Inp.combobox.activated['QString'].connect(self.DataTable)
         self.Pro.combobox.activated['QString'].connect(self.DataTable)
         self.Dis.combobox.activated['QString'].connect(self.DataTable)
-    
+        
 
     def DataCombo(self,text):
         self.Inp.combobox.clear()
@@ -181,13 +187,14 @@ class Conf_Tab(QWidget):
 
     def DataTable (self,text):
         backend = str(self.select.currentText())
-        value_Inp = str(self.Inp.combobox.currentText())
-        value_Dis = str(self.Dis.combobox.currentText())
-        value_Pro = str(self.Pro.combobox.currentText()) 
-        self.Inp.addDataConf(backend,value_Inp)
-        #BINoculars.util.get_input_configkeys(backend,value_Inp)
-        #BINoculars.util.get_dispatcher_configkeys(value_Dis)
-        #BINoculars.util.get_projection_configkeys(backend,value_Pro)
+
+        inp = BINoculars.util.get_input_configkeys(backend, str(self.Inp.combobox.currentText()))
+        disp = BINoculars.util.get_dispatcher_configkeys(str(self.Dis.combobox.currentText()))
+        proj = BINoculars.util.get_projection_configkeys(backend, str(self.Pro.combobox.currentText()))
+
+        self.Inp.addDataConf(inp)
+        self.Dis.addDataConf(disp)
+        self.Pro.addDataConf(proj)
  
     def save(self, filename): 
         with open(filename, 'w') as fp:
@@ -196,11 +203,15 @@ class Conf_Tab(QWidget):
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
             fp.write('[input]\n')
             for key, value, comment in self.Inp.getParam():
+                if key == 'type':
+                    value = '{0}:{1}'.format(self.select.currentText(),value)
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
             fp.write('[projection]\n')
             for key, value, comment in self.Pro.getParam():
+                if key == 'type':
+                    value = '{0}:{1}'.format(self.select.currentText(),value)
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
-           
+
 
     def read_data(self,filename):
         with open(filename, 'r') as inf:
@@ -226,7 +237,7 @@ class Conf_Tab(QWidget):
                 # wrong line
                     continue
                 data[key].append([name.strip(' '), value.strip(' '), cauda.strip(' ')])
-         
+              
         for key in data:
             if key == 'dispatcher':
                 self.Dis.addData(data[key])
