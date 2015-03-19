@@ -93,14 +93,20 @@ class Table(QWidget):
 
         self.btn_add_row = QPushButton('+', self)
         self.connect(self.btn_add_row, SIGNAL('clicked()'), self.add_row)
-        
+        self.buttonRemove = QPushButton('-',self)
+        self.connect(self.buttonRemove, SIGNAL("clicked()"), self.remove) 
+
         layout =QGridLayout()
         layout.addWidget(self.table,0,0,3,10)
         layout.addWidget(self.btn_add_row,0,11)
+        layout.addWidget(self.buttonRemove,1,11)
         self.setLayout(layout)
 
     def add_row(self):
         self.table.insertRow(self.table.rowCount())
+    
+    def remove(self):
+        self.table.removeRow(self.table.currentRow()) 
 
     def get_keys(self):
         return list(self.table.item(index,0).text() for index in range(self.table.rowCount())) 
@@ -121,9 +127,9 @@ class Table(QWidget):
     def addData(self, data):
         for item in data:
             if item[0] == 'type':
-                    box = self.table.cellWidget(0,1)
-                    box.addItems(QStringList(item[1]))
-                    box.setCurrentIndex(box.findText(item[1]))
+                box = self.table.cellWidget(0,1)
+                box.setCurrentIndex(box.findText(item[1]))
+                    
             else: 
                 self.add_row()
                 row = self.table.rowCount()
@@ -136,8 +142,9 @@ class Table(QWidget):
         newconfigs = list([item[0], '', item[1]] for item in items if item[0] not in keys)
         self.addData(newconfigs)
                 
-
-        
+    def add_to_combo(self, items):
+        self.combobox.clear()
+        self.combobox.addItems(items)
     
 
 #----------------------------------------------------------------------------------------------------
@@ -155,7 +162,8 @@ class Conf_Tab(QWidget):
         label3 = QLabel('<strong>Projection<strong>')
 
         self.select = QComboBox()
-        self.select.addItems(QStringList(BINoculars.util.get_backends()))
+        backends = list(backend.lower() for backend in BINoculars.util.get_backends())
+        self.select.addItems(QStringList(backends))
         self.run = QPushButton('run')
         self.scan = QLineEdit()
         self.run.setStyleSheet("background-color: darkred")
@@ -172,7 +180,8 @@ class Conf_Tab(QWidget):
         Layout.addWidget(self.scan,7,1)
         self.setLayout(Layout)
  
-        self.Dis.combobox.addItems(QStringList(BINoculars.util.get_dispatchers()))
+        dispatchers = list(dispatcher.lower() for dispatcher in BINoculars.util.get_dispatchers())
+        self.Dis.add_to_combo(QStringList(dispatchers))
         self.select.activated['QString'].connect(self.DataCombo)
         self.Inp.combobox.activated['QString'].connect(self.DataTableInp)
         self.Pro.combobox.activated['QString'].connect(self.DataTableInpPro)
@@ -180,16 +189,16 @@ class Conf_Tab(QWidget):
         
 
     def DataCombo(self,text):
-        self.Inp.combobox.clear()
-        self.Pro.combobox.clear()
-        self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs(str(text))))
-        self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections(str(text))))
+        inputs = list(inpu.lower() for inpu in BINoculars.util.get_inputs(str(text)))
+        self.Inp.add_to_combo(QStringList(inputs))
+        projections = list(projection.lower() for projection in BINoculars.util.get_projections(str(text)))
+        self.Pro.add_to_combo(QStringList(projections))
+        print self.Pro.add_to_combo(QStringList(projections))
 
     def DataTableInp (self,text):
         backend = str(self.select.currentText())
         inp = BINoculars.util.get_input_configkeys(backend, str(self.Inp.combobox.currentText()))
         self.Inp.addDataConf(inp)
-
 
     def DataTableInpPro (self,text):
         backend = str(self.select.currentText())
@@ -242,8 +251,18 @@ class Conf_Tab(QWidget):
                 except ValueError:
                 # wrong line
                     continue
+
+                if name.strip(' ') == 'type' and ':' in value:
+                    backend, value = value.strip(' ').lower().split(':')
+
+
                 data[key].append([name.strip(' '), value.strip(' '), cauda.strip(' ')])
-              
+
+        backendindex = self.select.findText(backend)
+        if backendindex != -1:
+            self.select.setCurrentIndex(backendindex)
+            self.DataCombo(backend)
+
         for key in data:
             if key == 'dispatcher':
                 self.Dis.addData(data[key])
