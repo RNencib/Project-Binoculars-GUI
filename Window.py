@@ -174,9 +174,9 @@ class Conf_Tab(QWidget):
  
         self.Dis.combobox.addItems(QStringList(BINoculars.util.get_dispatchers()))
         self.select.activated['QString'].connect(self.DataCombo)
-        self.Inp.combobox.activated['QString'].connect(self.DataTable)
-        self.Pro.combobox.activated['QString'].connect(self.DataTable)
-        self.Dis.combobox.activated['QString'].connect(self.DataTable)
+        self.Inp.combobox.activated['QString'].connect(self.DataTableInp)
+        self.Pro.combobox.activated['QString'].connect(self.DataTableInpPro)
+        self.Dis.combobox.activated['QString'].connect(self.DataTableInpDis)
         
 
     def DataCombo(self,text):
@@ -185,16 +185,22 @@ class Conf_Tab(QWidget):
         self.Inp.combobox.addItems(QStringList(BINoculars.util.get_inputs(str(text))))
         self.Pro.combobox.addItems(QStringList(BINoculars.util.get_projections(str(text))))
 
-    def DataTable (self,text):
+    def DataTableInp (self,text):
         backend = str(self.select.currentText())
-
         inp = BINoculars.util.get_input_configkeys(backend, str(self.Inp.combobox.currentText()))
-        disp = BINoculars.util.get_dispatcher_configkeys(str(self.Dis.combobox.currentText()))
-        proj = BINoculars.util.get_projection_configkeys(backend, str(self.Pro.combobox.currentText()))
-
         self.Inp.addDataConf(inp)
-        self.Dis.addDataConf(disp)
+
+
+    def DataTableInpPro (self,text):
+        backend = str(self.select.currentText())
+        proj = BINoculars.util.get_projection_configkeys(backend, str(self.Pro.combobox.currentText()))
         self.Pro.addDataConf(proj)
+
+    def DataTableInpDis (self,text):
+        backend = str(self.select.currentText())
+        disp = BINoculars.util.get_dispatcher_configkeys(str(self.Dis.combobox.currentText()))
+        self.Dis.addDataConf(disp)
+
  
     def save(self, filename): 
         with open(filename, 'w') as fp:
