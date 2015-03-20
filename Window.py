@@ -2,7 +2,7 @@ import sys, csv, os
 import itertools
 import inspect
 import glob
-import BINoculars.util
+import BINoculars.util, BINoculars.main
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -41,7 +41,7 @@ class SimpleGUI(QMainWindow):
         fileMenu.addAction(saveFile)
         fileMenu = menubar.addMenu('&New Configuration')
         fileMenu.addAction(Create)
-        fileMenu = menubar.addMenu('&RUN')
+        fileMenu = menubar.addMenu('&HELP')
 
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
@@ -128,8 +128,9 @@ class Table(QWidget):
         for item in data:
             if item[0] == 'type':
                 box = self.table.cellWidget(0,1)
-                box.setCurrentIndex(box.findText(item[1]))
-                    
+                box.setCurrentIndex(box.findText(item[1], Qt.MatchFixedString))
+                newitem = QTableWidgetItem(item[2])
+                self.table.setItem(0, 2, newitem)
             else: 
                 self.add_row()
                 row = self.table.rowCount()
@@ -180,8 +181,7 @@ class Conf_Tab(QWidget):
         Layout.addWidget(self.scan,7,1)
         self.setLayout(Layout)
  
-        dispatchers = list(dispatcher.lower() for dispatcher in BINoculars.util.get_dispatchers())
-        self.Dis.add_to_combo(QStringList(dispatchers))
+        self.Dis.add_to_combo(QStringList(BINoculars.util.get_dispatchers()))
         self.select.activated['QString'].connect(self.DataCombo)
         self.Inp.combobox.activated['QString'].connect(self.DataTableInp)
         self.Pro.combobox.activated['QString'].connect(self.DataTableInpPro)
@@ -189,11 +189,8 @@ class Conf_Tab(QWidget):
         
 
     def DataCombo(self,text):
-        inputs = list(inpu.lower() for inpu in BINoculars.util.get_inputs(str(text)))
-        self.Inp.add_to_combo(QStringList(inputs))
-        projections = list(projection.lower() for projection in BINoculars.util.get_projections(str(text)))
-        self.Pro.add_to_combo(QStringList(projections))
-        print self.Pro.add_to_combo(QStringList(projections))
+        self.Inp.add_to_combo(QStringList(BINoculars.util.get_inputs(str(text))))
+        self.Pro.add_to_combo(QStringList(BINoculars.util.get_projections(str(text))))
 
     def DataTableInp (self,text):
         backend = str(self.select.currentText())
@@ -227,6 +224,30 @@ class Conf_Tab(QWidget):
                     value = '{0}:{1}'.format(self.select.currentText(),value)
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
 
+    def get_configobj(self, filename):
+        indict = {}
+        for key, value, comment in self.Inp.getParam():
+            if key == 'type':
+                value = '{0}:{1}'.format(self.select.currentText(),value)
+                indict[key] = value
+            fp.write('[projection]\n')
+
+
+
+
+            for key, value, comment in self.Dis.getParam():# cycles over the iterator object
+                fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
+            fp.write('[input]\n')
+
+            for key, value, comment in self.Pro.getParam():
+                if key == 'type':
+                    value = '{0}:{1}'.format(self.select.currentText(),value)
+                fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
+
+
+        cfg = BINoculars.util.Configfile()
+        setattr(cfg, 'input', indict)
+        return cfg
 
     def read_data(self,filename):
         with open(filename, 'r') as inf:
@@ -234,34 +255,29 @@ class Conf_Tab(QWidget):
  
         data = {'dispatcher': [], 'input': [], 'projection': []}
         for line in lines:
-            if 'dispatcher' in line:
+            line = line.strip('\n')
+            if '[dispatcher]' in line:
                 key = 'dispatcher'
-            elif 'input' in line:
+            elif '[input]' in line:
                 key = 'input'
-            elif 'projection' in line: 
+            elif '[projection]' in line: 
                 key = 'projection'
             else:
-                try:
-                    caput, cauda = line.split('#')
-                except ValueError:
-                # no '#' in line
-                    continue
-                try:
+                if '#' in line:
+                    index = line.index('#')
+                    caput = line[:index]
+                    cauda = line[index:]
+                else:
+                    caput = line
+                    cauda = ''
+                if '=' in caput:
                     name, value = caput.split('=')
-                except ValueError:
-                # wrong line
-                    continue
+                    if name.strip(' ') == 'type' and ':' in value:
+                        backend, value = value.strip(' ').split(':')
+                    data[key].append([name.strip(' '), value.strip(' '), cauda.strip(' ')])
 
-                if name.strip(' ') == 'type' and ':' in value:
-                    backend, value = value.strip(' ').lower().split(':')
-
-
-                data[key].append([name.strip(' '), value.strip(' '), cauda.strip(' ')])
-
-        backendindex = self.select.findText(backend)
-        if backendindex != -1:
-            self.select.setCurrentIndex(backendindex)
-            self.DataCombo(backend)
+        self.select.setCurrentIndex(self.select.findText(backend, Qt.MatchFixedString))
+        self.DataCombo(backend)
 
         for key in data:
             if key == 'dispatcher':
@@ -272,6 +288,10 @@ class Conf_Tab(QWidget):
                 self.Pro.addData(data[key])
 
                 
+        def run(self, cfg):
+            command = 
+
+            #BINoculars.main.Main.from_object(cfg, command)
     
 
 
