@@ -165,9 +165,10 @@ class Conf_Tab(QWidget):
         self.select = QComboBox()
         backends = list(backend.lower() for backend in BINoculars.util.get_backends())
         self.select.addItems(QStringList(backends))
-        self.run = QPushButton('run')
+        self.start = QPushButton('run')
+        self.start.clicked.connect(self.run)
         self.scan = QLineEdit()
-        self.run.setStyleSheet("background-color: darkred")
+        self.start.setStyleSheet("background-color: darkred")
 
         Layout = QGridLayout()
         Layout.addWidget(self.select,0,1)
@@ -230,23 +231,24 @@ class Conf_Tab(QWidget):
             if key == 'type':
                 value = '{0}:{1}'.format(self.select.currentText(),value)
                 indict[key] = value
-            fp.write('[projection]\n')
+            
 
+        for key, value, comment in self.Dis.getParam():# cycles over the iterator object
+            if key == 'type':
+                value = '{0}:{1}'.format(self.select.currentText(),value)
+                indict[key] = value
+            
 
-
-
-            for key, value, comment in self.Dis.getParam():# cycles over the iterator object
-                fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
-            fp.write('[input]\n')
-
-            for key, value, comment in self.Pro.getParam():
-                if key == 'type':
-                    value = '{0}:{1}'.format(self.select.currentText(),value)
-                fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
-
+        for key, value, comment in self.Pro.getParam():
+            if key == 'type':
+                value = '{0}:{1}'.format(self.select.currentText(),value)
+                indict[key] = value
+            
 
         cfg = BINoculars.util.Configfile()
         setattr(cfg, 'input', indict)
+        setattr(cfg, 'dispatcher', indict)
+        setattr(cfg, 'projection', indict)
         return cfg
 
     def read_data(self,filename):
@@ -288,10 +290,9 @@ class Conf_Tab(QWidget):
                 self.Pro.addData(data[key])
 
                 
-        def run(self, cfg):
-            command = 
-
-            #BINoculars.main.Main.from_object(cfg, command)
+    def run(self, cfg):
+        command = self.scan
+        BINoculars.main.Main.from_object(cfg, command)
     
 
 
