@@ -166,7 +166,7 @@ class Conf_Tab(QWidget):
         backends = list(backend.lower() for backend in BINoculars.util.get_backends())
         self.select.addItems(QStringList(backends))
         self.start = QPushButton('run')
-        self.start.clicked.connect(self.run)
+        self.connect(self.start, SIGNAL("clicked()"), self.run)
         self.scan = QLineEdit()
         self.start.setStyleSheet("background-color: darkred")
 
@@ -178,7 +178,7 @@ class Conf_Tab(QWidget):
         Layout.addWidget(self.Inp,4,1)
         Layout.addWidget(label3,5,1)
         Layout.addWidget(self.Pro,6,1)
-        Layout.addWidget(self.run,7,0)
+        Layout.addWidget(self.start,7,0)
         Layout.addWidget(self.scan,7,1)
         self.setLayout(Layout)
  
@@ -233,7 +233,7 @@ class Conf_Tab(QWidget):
                 indict[key] = value
             
 
-        for key, value, comment in self.Dis.getParam():# cycles over the iterator object
+        for key, value, comment in self.Dis.getParam():
             if key == 'type':
                 value = '{0}:{1}'.format(self.select.currentText(),value)
                 indict[key] = value
@@ -290,9 +290,10 @@ class Conf_Tab(QWidget):
                 self.Pro.addData(data[key])
 
                 
-    def run(self, cfg):
-        command = self.scan
+    def run(self,cfg):
+        command = self.scan.text()
         BINoculars.main.Main.from_object(cfg, command)
+        
     
 
 
