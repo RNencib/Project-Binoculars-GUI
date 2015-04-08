@@ -46,7 +46,7 @@ class SimpleGUI(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
         self.setPalette(palette)
-        self.setGeometry(250, 200,500,500)
+        self.setGeometry(250, 100,500,500)
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))
         self.show()
@@ -177,7 +177,7 @@ class Conf_Tab(QWidget):
         Layout.addWidget(label2,3,1)
         Layout.addWidget(self.Inp,4,1)
         Layout.addWidget(label3,5,1)
-        Layout.addWidget(self.Pro,6,1)
+        Layout.addWidget(self.Pro,6,1) 
         Layout.addWidget(self.start,7,0)
         Layout.addWidget(self.scan,7,1)
         self.setLayout(Layout)
@@ -225,31 +225,32 @@ class Conf_Tab(QWidget):
                     value = '{0}:{1}'.format(self.select.currentText(),value)
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
 
-    def get_configobj(self, filename):
-        indict = {}
+    def get_configobj(self):
+
+        inInp = {}
+        inDis = {}
+        inPro = {}
         for key, value, comment in self.Inp.getParam():
             if key == 'type':
                 value = '{0}:{1}'.format(self.select.currentText(),value)
-                indict[key] = value
-            
+            inInp[key] = value   
 
         for key, value, comment in self.Dis.getParam():
             if key == 'type':
                 value = '{0}:{1}'.format(self.select.currentText(),value)
-                indict[key] = value
-            
-
+            inDis[key] = value 
+        
         for key, value, comment in self.Pro.getParam():
             if key == 'type':
                 value = '{0}:{1}'.format(self.select.currentText(),value)
-                indict[key] = value
-            
-
-        cfg = BINoculars.util.Configfile()
-        setattr(cfg, 'input', indict)
-        setattr(cfg, 'dispatcher', indict)
-        setattr(cfg, 'projection', indict)
+            inPro[key] = value
+        
+        cfg = BINoculars.util.ConfigFile()
+        setattr(cfg, 'input', inInp)
+        setattr(cfg, 'dispatcher', inDis)
+        setattr(cfg, 'projection', inPro)
         return cfg
+
 
     def read_data(self,filename):
         with open(filename, 'r') as inf:
@@ -290,11 +291,12 @@ class Conf_Tab(QWidget):
                 self.Pro.addData(data[key])
 
                 
-    def run(self,cfg):
+    def run(self):
         command = self.scan.text()
-        BINoculars.main.Main.from_object(cfg, command)
-        
-    
+        config = self.get_configobj()
+        #BINoculars.main.Main.from_object(config, command)
+        print command
+        print config
 
 
 
