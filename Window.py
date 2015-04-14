@@ -3,6 +3,7 @@ import itertools
 import inspect
 import glob
 import BINoculars.util, BINoculars.main
+import time
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -114,14 +115,14 @@ class Table(QWidget):
 
     def getParam(self):
         for index in range(self.table.rowCount()):
-            key = self.table.item(index,0).text() 
-            comment = self.table.item(index, 2).text()
+            key = str(self.table.item(index,0).text()) 
+            comment = str(self.table.item(index, 2).text())
             if self.table.item(index,1):
-                value = self.table.item(index, 1).text()
+                value = str(self.table.item(index, 1).text())
             else:
-                value = self.table.cellWidget(index, 1).currentText()
+                value = str(self.table.cellWidget(index, 1).currentText())
             if self.table.item == None:
-                value = self.table.item(index,1).text("")
+                value = str(self.table.item(index,1).text(""))
             yield key, value, comment
         
     def addData(self, data):
@@ -231,22 +232,21 @@ class Conf_Tab(QWidget):
         inDis = {}
         inPro = {}
 
-        for key, value, comment in self.Dis.getParam():
-            if key == 'type':
-                value = '{0}'.format(value.toLower())
-            inDis[key] = value
+        InDis = dict((key, value) for key, value, comment in self.Dis.getParam())
 
         for key, value, comment in self.Inp.getParam():
             if key == 'type':
-                value = '{0}:{1}'.format(self.select.currentText(),value.toLower())
+                value = '{0}:{1}'.format(self.select.currentText(),value)
             inInp[key] = value   
-        
+            print value
+
         for key, value, comment in self.Pro.getParam():
             if key == 'type':
-                value = '{0}:{1}'.format(self.select.currentText(),value.toLower())
+                value = '{0}:{1}'.format(self.select.currentText(),value)
             inPro[key] = value
+            print value
 
-        cfg = BINoculars.util.ConfigFile()
+        cfg = BINoculars.util.ConfigFile('gui {0}'.format(time.strftime('%d %b %Y %H:%M:%S', time.localtime())))
         setattr(cfg, 'input', inInp)
         setattr(cfg, 'dispatcher', inDis)
         setattr(cfg, 'projection', inPro)
@@ -293,9 +293,10 @@ class Conf_Tab(QWidget):
 
                 
     def run(self):
-        command = self.scan.text()
-        config = self.get_configobj()
-        BINoculars.main.Main.from_object(config, command)
+        command = str(self.scan.text())
+        cfg = self.get_configobj()
+        BINoculars.main.Main.from_object(cfg, command)
+
         print command
         print config
 
