@@ -237,14 +237,12 @@ class Conf_Tab(QWidget):
         for key, value, comment in self.Inp.getParam():
             if key == 'type':
                 value = '{0}:{1}'.format(self.select.currentText(),value)
-            inInp[key] = value   
-            print value
+            inInp[key] = value 
 
         for key, value, comment in self.Pro.getParam():
             if key == 'type':
                 value = '{0}:{1}'.format(self.select.currentText(),value)
             inPro[key] = value
-            print value
 
         cfg = BINoculars.util.ConfigFile('gui {0}'.format(time.strftime('%d %b %Y %H:%M:%S', time.localtime())))
         setattr(cfg, 'input', inInp)
@@ -293,12 +291,9 @@ class Conf_Tab(QWidget):
 
                 
     def run(self):
-        command = str(self.scan.text())
+        command = [str(self.scan.text())]
         cfg = self.get_configobj()
         BINoculars.main.Main.from_object(cfg, command)
-
-        print command
-        print config
 
 
 
