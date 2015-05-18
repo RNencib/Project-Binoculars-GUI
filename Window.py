@@ -1,4 +1,4 @@
-import sys, csv, os
+import sys,os
 import itertools
 import inspect
 import glob
@@ -6,6 +6,7 @@ import BINoculars.util, BINoculars.main
 import time
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+
 
 #--------------------------------------------CREATE MAIN WINDOW----------------------------------------
 class SimpleGUI(QMainWindow):
@@ -35,14 +36,15 @@ class SimpleGUI(QMainWindow):
         Create = QAction('Create', self)
         Create.setStatusTip('Create new configuration')
         Create.triggered.connect(self.New_Config)
-         
+
+
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openFile)
         fileMenu.addAction(saveFile)
         fileMenu = menubar.addMenu('&New Configuration')
         fileMenu.addAction(Create)
-        fileMenu = menubar.addMenu('&HELP')
+
 
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
@@ -71,6 +73,7 @@ class SimpleGUI(QMainWindow):
     def New_Config(self):
         self.tab_widget.addTab(Conf_Tab(self),'New configuration')
 
+
 #----------------------------------------------------------------------------------------------------
 #-----------------------------------------CREATE TABLE-----------------------------------------------
 class Table(QWidget):
@@ -78,7 +81,7 @@ class Table(QWidget):
         super(Table, self).__init__()
         
         # create a QTableWidget
-        self.table = QTableWidget(1, 3, self)
+        self.table = QTableWidget(1, 2, self)
         self.table.setHorizontalHeaderLabels(['Parameter', 'Value','Comment'])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.verticalHeader().setVisible(False)
@@ -86,21 +89,22 @@ class Table(QWidget):
         #create combobox
         self.combobox = QComboBox()
         #add items
-        cell = QTableWidgetItem(QString("type"))
+        self.cell = QTableWidgetItem(QString("type"))
         cell2 = QTableWidgetItem(QString(""))
-        self.table.setItem(0, 0, cell)
+        self.table.setItem(0, 0,self.cell)
         self.table.setCellWidget(0, 1, self.combobox)
-        self.table.setItem(0, 2,cell2)
 
         self.btn_add_row = QPushButton('+', self)
         self.connect(self.btn_add_row, SIGNAL('clicked()'), self.add_row)
         self.buttonRemove = QPushButton('-',self)
-        self.connect(self.buttonRemove, SIGNAL("clicked()"), self.remove) 
+        self.connect(self.buttonRemove, SIGNAL("clicked()"), self.remove)
+        self.btn_add_row.resize(10,10)
+        self.buttonRemove.resize(10,10) 
 
         layout =QGridLayout()
-        layout.addWidget(self.table,0,0,3,10)
-        layout.addWidget(self.btn_add_row,0,11)
-        layout.addWidget(self.buttonRemove,1,11)
+        layout.addWidget(self.table,1,0,1,0)
+        layout.addWidget(self.btn_add_row,0,0)
+        layout.addWidget(self.buttonRemove,0,1)
         self.setLayout(layout)
 
     def add_row(self):
@@ -115,8 +119,9 @@ class Table(QWidget):
 
     def getParam(self):
         for index in range(self.table.rowCount()):
-            key = str(self.table.item(index,0).text()) 
-            comment = str(self.table.item(index, 2).text())
+            key = str(self.table.item(index,0).text())
+            comment = self.table.item(index,0).QToolTip.text()
+            print comment
             if self.table.item(index,1):
                 value = str(self.table.item(index, 1).text())
             else:
@@ -130,14 +135,15 @@ class Table(QWidget):
             if item[0] == 'type':
                 box = self.table.cellWidget(0,1)
                 box.setCurrentIndex(box.findText(item[1], Qt.MatchFixedString))
-                newitem = QTableWidgetItem(item[2])
-                self.table.setItem(0, 2, newitem)
+                self.cell.setToolTip(item[2])
             else: 
                 self.add_row()
                 row = self.table.rowCount()
                 for col in range(self.table.columnCount()):
                     newitem = QTableWidgetItem(item[col])
                     self.table.setItem(row -1, col, newitem)
+                    newitem.setToolTip(item[2])
+                        
 
     def addDataConf(self, items):
         keys = self.get_keys()
@@ -172,15 +178,15 @@ class Conf_Tab(QWidget):
         self.start.setStyleSheet("background-color: darkred")
 
         Layout = QGridLayout()
-        Layout.addWidget(self.select,0,1)
-        Layout.addWidget(label1,1,1)
-        Layout.addWidget(self.Dis,2,1)
-        Layout.addWidget(label2,3,1)
-        Layout.addWidget(self.Inp,4,1)
-        Layout.addWidget(label3,5,1)
-        Layout.addWidget(self.Pro,6,1) 
-        Layout.addWidget(self.start,7,0)
-        Layout.addWidget(self.scan,7,1)
+        Layout.addWidget(label1,0,2)
+        Layout.addWidget(label2,0,1)
+        Layout.addWidget(label3,0,3)
+        Layout.addWidget(self.select,0,0)
+        Layout.addWidget(self.Dis,1,2)
+        Layout.addWidget(self.Inp,1,1)
+        Layout.addWidget(self.Pro,1,3) 
+        Layout.addWidget(self.start,2,0)
+        Layout.addWidget(self.scan,2,1)
         self.setLayout(Layout)
  
         self.Dis.add_to_combo(QStringList(BINoculars.util.get_dispatchers()))
