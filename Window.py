@@ -90,17 +90,16 @@ class Table(QWidget):
         self.combobox = QComboBox()
         #add items
         self.cell = QTableWidgetItem(QString("type"))
-        cell2 = QTableWidgetItem(QString(""))
         self.table.setItem(0, 0,self.cell)
         self.table.setCellWidget(0, 1, self.combobox)
-
+        #we create pushbuttons and we call the method when we clic on 
         self.btn_add_row = QPushButton('+', self)
         self.connect(self.btn_add_row, SIGNAL('clicked()'), self.add_row)
         self.buttonRemove = QPushButton('-',self)
         self.connect(self.buttonRemove, SIGNAL("clicked()"), self.remove)
         self.btn_add_row.resize(10,10)
         self.buttonRemove.resize(10,10) 
-
+        #the dispositon of the table and the butttons
         layout =QGridLayout()
         layout.addWidget(self.table,1,0,1,0)
         layout.addWidget(self.btn_add_row,0,0)
@@ -117,11 +116,10 @@ class Table(QWidget):
         return list(self.table.item(index,0).text() for index in range(self.table.rowCount())) 
 
 
-    def getParam(self):
+    def getParam(self):#Here we take all values on tables
         for index in range(self.table.rowCount()):
             key = str(self.table.item(index,0).text())
-            comment = self.table.item(index,0).QToolTip.text()
-            print comment
+            comment = str(self.table.item(index,0).toolTip())
             if self.table.item(index,1):
                 value = str(self.table.item(index, 1).text())
             else:
@@ -130,7 +128,7 @@ class Table(QWidget):
                 value = str(self.table.item(index,1).text(""))
             yield key, value, comment
         
-    def addData(self, data):
+    def addData(self, data):#Here we put all values on tables
         for item in data:
             if item[0] == 'type':
                 box = self.table.cellWidget(0,1)
@@ -140,9 +138,9 @@ class Table(QWidget):
                 self.add_row()
                 row = self.table.rowCount()
                 for col in range(self.table.columnCount()):
-                    newitem = QTableWidgetItem(item[col])
-                    self.table.setItem(row -1, col, newitem)
-                    newitem.setToolTip(item[2])
+                    self.newitem = QTableWidgetItem(item[col])
+                    self.table.setItem(row -1, col, self.newitem)
+                    self.newitem.setToolTip(item[2])
                         
 
     def addDataConf(self, items):
@@ -161,6 +159,7 @@ class Conf_Tab(QWidget):
     def __init__(self, parent = None):
 
         super(Conf_Tab,self).__init__()
+        #we create 3 tables
         self.Dis = Table()
         self.Inp = Table()
         self.Pro = Table()
@@ -171,12 +170,14 @@ class Conf_Tab(QWidget):
 
         self.select = QComboBox()
         backends = list(backend.lower() for backend in BINoculars.util.get_backends())
+        #we add the list of different backends on the select combobox
         self.select.addItems(QStringList(backends))
         self.start = QPushButton('run')
         self.connect(self.start, SIGNAL("clicked()"), self.run)
         self.scan = QLineEdit()
         self.start.setStyleSheet("background-color: darkred")
 
+        #the dispositon of all elements of the gui
         Layout = QGridLayout()
         Layout.addWidget(label1,0,2)
         Layout.addWidget(label2,0,1)
