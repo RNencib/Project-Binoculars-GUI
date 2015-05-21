@@ -16,17 +16,20 @@ class SimpleGUI(QMainWindow):
         self.initUI()
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
+        #add the close button for tabs
         close = self.tab_widget.setTabsClosable(True)
         self.tab_widget.tabCloseRequested.connect(self.close_tab)
 
+    #method for close tabs
     def close_tab(self, tab):
         self.tab_widget.removeTab(tab)
 
     def initUI(self):
+        #we create the menu bar
         openFile = QAction('Open', self)
         openFile.setShortcut('Ctrl+O')
         openFile.setStatusTip('Open new File')
-        openFile.triggered.connect(self.ShowFile)
+        openFile.triggered.connect(self.showFile)
 
         saveFile = QAction('Save', self)
         saveFile.setShortcut('Ctrl+S')
@@ -45,31 +48,34 @@ class SimpleGUI(QMainWindow):
         fileMenu = menubar.addMenu('&New Configuration')
         fileMenu.addAction(Create)
 
-
+        #we configue the main windows
         palette = QPalette()
         palette.setColor(QPalette.Background,Qt.gray)
         self.setPalette(palette)
-        self.setGeometry(250, 100,500,500)
+        #self.setGeometry(250, 100,500,500)
         self.setWindowTitle('Binoculars')
         self.setWindowIcon(QIcon('binoculars.png'))
-        self.show()
+        self.showMaximized()
 
-    def ShowFile(self):
+    #we call the load function
+    def showFile(self):
         filename = QFileDialog.getOpenFileName(self, 'Open File', '')
         for F in filename.split('/') :
             NameFile = []
             NameFile.append(F)
         NameFile.reverse()
-        self.tab_widget.addTab(Conf_Tab(self),NameFile[0])
+        newIndex =  self.tab_widget.addTab(Conf_Tab(self),NameFile[0])
+        self.tab_widget.setCurrentIndex(newIndex)
         widget = self.tab_widget.currentWidget()
         widget.read_data(filename)
 
-
+    #we call the save function
     def Save(self):
         filename = QFileDialog().getSaveFileName(self, 'Enregistrer', '', '*.txt')
         widget = self.tab_widget.currentWidget() 
         widget.save(filename) 
-        
+
+    #we call the new tab conf   
     def New_Config(self):
         self.tab_widget.addTab(Conf_Tab(self),'New configuration')
 
@@ -115,8 +121,8 @@ class Table(QWidget):
     def get_keys(self):
         return list(self.table.item(index,0).text() for index in range(self.table.rowCount())) 
 
-
-    def getParam(self):#Here we take all values on tables
+    #Here we take all values on tables
+    def getParam(self):
         for index in range(self.table.rowCount()):
             key = str(self.table.item(index,0).text())
             comment = str(self.table.item(index,0).toolTip())
@@ -127,8 +133,9 @@ class Table(QWidget):
             if self.table.item == None:
                 value = str(self.table.item(index,1).text(""))
             yield key, value, comment
-        
-    def addData(self, data):#Here we put all values on tables
+
+    #Here we put all values on tables   
+    def addData(self, data):
         for item in data:
             if item[0] == 'type':
                 box = self.table.cellWidget(0,1)
@@ -175,6 +182,7 @@ class Conf_Tab(QWidget):
         self.start = QPushButton('run')
         self.connect(self.start, SIGNAL("clicked()"), self.run)
         self.scan = QLineEdit()
+        self.scan.setToolTip('scan selection exemple: 820 824')
         self.start.setStyleSheet("background-color: darkred")
 
         #the dispositon of all elements of the gui
@@ -189,7 +197,8 @@ class Conf_Tab(QWidget):
         Layout.addWidget(self.start,2,0)
         Layout.addWidget(self.scan,2,1)
         self.setLayout(Layout)
- 
+        
+        #Here we call all methods for selected an ellement on differents combobox 
         self.Dis.add_to_combo(QStringList(BINoculars.util.get_dispatchers()))
         self.select.activated['QString'].connect(self.DataCombo)
         self.Inp.combobox.activated['QString'].connect(self.DataTableInp)
@@ -216,11 +225,12 @@ class Conf_Tab(QWidget):
         disp = BINoculars.util.get_dispatcher_configkeys(str(self.Dis.combobox.currentText()))
         self.Dis.addDataConf(disp)
 
- 
+    #The save method we take all ellements on tables and we put them in this format {0} = {1} #{2}
     def save(self, filename): 
         with open(filename, 'w') as fp:
             fp.write('[dispatcher]\n')
-            for key, value, comment in self.Dis.getParam():# cycles over the iterator object
+            # cycles over the iterator object
+            for key, value, comment in self.Dis.getParam():
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
             fp.write('[input]\n')
             for key, value, comment in self.Inp.getParam():
@@ -233,6 +243,7 @@ class Conf_Tab(QWidget):
                     value = '{0}:{1}'.format(self.select.currentText(),value)
                 fp.write('{0} = {1} #{2}\n'.format(key, value, comment))
 
+    #This method take the name of objects and values for run the script
     def get_configobj(self):
 
         inInp = {}
@@ -257,7 +268,7 @@ class Conf_Tab(QWidget):
         setattr(cfg, 'projection', inPro)
         return cfg
 
-
+    #This method take elements on a text file or the binocular script and put them on tables
     def read_data(self,filename):
         with open(filename, 'r') as inf:
             lines = inf.readlines()
@@ -296,7 +307,7 @@ class Conf_Tab(QWidget):
             elif key == 'projection':
                 self.Pro.addData(data[key])
 
-                
+    #We run the script and create a hdf5 file            
     def run(self):
         command = [str(self.scan.text())]
         cfg = self.get_configobj()
