@@ -64,10 +64,11 @@ class SimpleGUI(QMainWindow):
             NameFile = []
             NameFile.append(F)
         NameFile.reverse()
-        newIndex =  self.tab_widget.addTab(Conf_Tab(self),NameFile[0])
-        self.tab_widget.setCurrentIndex(newIndex)
-        widget = self.tab_widget.currentWidget()
-        widget.read_data(filename)
+        if NameFile[0].isEmpty() == False:
+            newIndex =  self.tab_widget.addTab(Conf_Tab(self),NameFile[0])
+            self.tab_widget.setCurrentIndex(newIndex)
+            widget = self.tab_widget.currentWidget()
+            widget.read_data(filename)
 
     #we call the save function
     def Save(self):
