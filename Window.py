@@ -1,4 +1,4 @@
-import sys,os
+import sys,os 
 import itertools
 import inspect
 import glob
@@ -299,7 +299,6 @@ class Conf_Tab(QWidget):
 
         self.select.setCurrentIndex(self.select.findText(backend, Qt.MatchFixedString))
         self.DataCombo(backend)
-
         for key in data:
             if key == 'dispatcher':
                 self.Dis.addData(data[key])
